@@ -80,7 +80,7 @@ registerBtn.addEventListener("click", () => {
   }
   if (!passwordValid) {
     errorMsgRegister.textContent =
-      "رمز عبور باید حداقل 6 کاراکتر , حداقل یک حرف بزرگ , یک حرف کوچک , یک عدد ,یک نماد ویژه داشته باشد";
+      "رمز عبور باید شامل حرف بزرگ، حرف کوچک، عدد و کاراکتر خاص باشد";
     errorBoxRegister.style.display = "block";
     return;
   }
