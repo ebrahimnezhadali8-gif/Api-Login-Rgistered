@@ -149,3 +149,13 @@ input[type="tel"]::placeholder {
     border-color: #8b5cf6;
     box-shadow: 0 0 0 2px rgba(130, 80, 246, 0.2);
 }
+
+.is-valid {
+    padding-right: 2.5rem;              /* جا برای آیکون */
+    background-image: url('') !important; /* حذف آیکون خود Bootstrap */
+}
+
+.is-invalid {  
+    padding-right: 2.5rem;
+    background-image: url('') !important; /* حذف آیکون خود Bootstrap */
+}
