@@ -1,5 +1,5 @@
 body{
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -105,27 +105,15 @@ input[type="tel"]::placeholder {
 #Error-login ,#Error-forgot-code ,#Error-forgot ,#Error-register ,#Error-login-tow{
     display: none;
 }
-.login {
+
+.auth-form{
     display: none;
 }
-.register {
-    display: none;
+
+.auth-form.active {
+    display: block;
 }
-.forgot{
-    display: none;
-}
-.forgot-key{
-    display: none;
-}
-.change-password{
-    display: none;
-}
-.sucesfull-password{
-    display: none;
-}
-.sucesfull-registered{
-    display: none;
-}
+
 #phone-code {
     font-weight: bold;
     color: var(--main-purple) !important;
