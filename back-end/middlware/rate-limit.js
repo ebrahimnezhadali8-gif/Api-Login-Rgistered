@@ -10,3 +10,14 @@ export const registerLimiter = rateLimit({
     message: "تعداد تلاش بیش از حد مجاز است، بعداً دوباره امتحان کنید",
   },
 });
+
+export const LoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 7,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message: "تعداد تلاش بیش از حد مجاز است، بعداً دوباره امتحان کنید",
+  },
+});
