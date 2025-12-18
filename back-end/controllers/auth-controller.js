@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
-import UserModel from "../models/user-model";
-import AppError from "../utilites/app_error";
-import { trycatchHandler } from "../utilites/trycatch_handler";
+import UserModel from "../models/user-model.js";
+import AppError from "../utilites/app_error.js";
+import { trycatchHandler } from "../utilites/trycatch_handler.js";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
