@@ -20,7 +20,7 @@ export const registerSchema = Joi.object({
     }),
 
   password: Joi.string()
-    .min(8)
+    .min(6)
     .max(64)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/)
     .required()
