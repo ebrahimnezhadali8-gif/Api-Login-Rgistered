@@ -91,7 +91,7 @@ registerBtn.addEventListener("click", async () => {
 
   console.log("READY FOR BACKEND", payload);
   try {
-    const data = await apiPost("/api/users/register", payload);
+    const data = await apiPost("/api/auth/register", payload);
     console.log(data);
     showForm("sucesfull-registered");
     document.getElementById("message-succesfull-register").innerHTML =
