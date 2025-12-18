@@ -10,7 +10,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Login API is running...");
 });
-app.use("/api/users", userRouter);
+app.use("/api/auth", userRouter);
 app.use(errorHandler);
 
 export default app;
