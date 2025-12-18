@@ -1,7 +1,7 @@
 export function validateMobile(phone) {
   if (!phone) return false;
 
-  const regex = /^(09)(1[0-9]|3[0-9]|2[0-9])\d{7}$/;
+  const regex = /^(09)\d{9}$/;
   return regex.test(phone);
 }
 
