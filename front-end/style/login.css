@@ -114,7 +114,7 @@ input[type="tel"]::placeholder {
     display: block;
 }
 
-#phone-code {
+#phone-code , #phone-code-tow{
     font-weight: bold;
     color: var(--main-purple) !important;
 }
