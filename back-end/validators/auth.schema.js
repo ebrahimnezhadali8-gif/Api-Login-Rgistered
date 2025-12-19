@@ -48,3 +48,26 @@ export const loginSchema = Joi.object({
       "string.pattern.base": "رمز عبور معتبر نیست",
     }),
 });
+
+export const otpSchema = Joi.object({
+  phone: Joi.string()
+    .trim()
+    .pattern(/^09\d{9}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "شماره تلفن معتبر نیست",
+    }),
+
+  code: Joi.string()
+    .trim()
+    .pattern(/^\d{6}$/)
+    .required()
+    .messages({
+      "string.empty": "کد تایید الزامی است",
+      "string.pattern.base": "کد تایید باید ۶ رقم عددی باشد",
+    }),
+
+  type: Joi.string().valid("login", "forgot").required().messages({
+    "any.only": "نوع OTP معتبر نیست",
+  }),
+});
