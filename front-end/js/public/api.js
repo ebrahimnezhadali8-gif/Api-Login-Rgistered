@@ -1,8 +1,6 @@
 const BASE = "http://localhost:5500";
 
 export async function apiPost(url, body) {
-  console.log(body);
-  console.log(BASE + url)
   const res = await fetch(BASE + url, {
     method: "POST",
     headers: {
