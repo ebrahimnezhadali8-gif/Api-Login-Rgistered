@@ -124,9 +124,10 @@ input[type="tel"]::placeholder {
 }
 #recode ,#recode-tow {
     display: none;
+    text-decoration: none;
 }
 
-.input-code {
+.otp-input {
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -134,7 +135,7 @@ input[type="tel"]::placeholder {
     direction: ltr; /* خیلی مهم */
 }
 
-.input-code input {
+.otp-input input {
     width: 48px;
     height: 56px;
     border-radius: 12px;
@@ -145,7 +146,7 @@ input[type="tel"]::placeholder {
     transition: 0.2s;
 }
 
-.input-code input:focus {
+.otp-input input:focus {
     border-color: #8b5cf6;
     box-shadow: 0 0 0 2px rgba(130, 80, 246, 0.2);
 }
