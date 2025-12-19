@@ -2,6 +2,9 @@ import bcrypt from "bcrypt";
 import UserModel from "../models/user-model.js";
 import AppError from "../utilites/app_error.js";
 import { trycatchHandler } from "../utilites/trycatch_handler.js";
+import { generateCode, hashCode } from "../services/generate-code.js";
+import OtpModel from "../models/otp-user-model.js";
+import jwt from "jsonwebtoken";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
@@ -31,7 +34,36 @@ export const login = trycatchHandler(async (req, res) => {
   if (!validPassword)
     throw new AppError(101, "شماره تلفن یا رمز عبور اشتباه است", 401);
 
+  const code = generateCode();
+  const hashedCode = hashCode(code);
+
+  console.log("OTP CODE :", code);
+  const expire = new Date(Date.now() + 3 * 60 * 1000);
+  await OtpModel.addOtp(user[0].id, hashedCode, "login", expire);
+
   res.status(200).json({
-    message: "ورود با موفقیت"
-  })
+    message: "کد به شماره شما ارسال شد ",
+  });
+});
+
+export const otpCheck = trycatchHandler(async (req, res) => {
+  const { phone, code, type } = req.body;
+  const user = await UserModel.getUserPhone(phone);
+  const otp = await OtpModel.getOtp(user[0].id, type);
+  if (!otp[0]) throw new AppError(404, "کد نا معتبر است", 401);
+  const codeHash = hashCode(code);
+  if (otp[0].code !== codeHash)
+    throw new AppError(401, "کد نا معتبر است ", 401);
+
+  const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  const token = jwt.sign(
+    { id: user[0].id, role: user[0].role, phone: user[0].phone },
+    process.env.SECRET_KEY,
+    { expiresIn: "2h" } // Time Token
+  );
+  res.status(200).json({
+    message: "ورود با موفقیت انجام شد",
+    token: token,
+    role: user[0].role,
+  });
 });
