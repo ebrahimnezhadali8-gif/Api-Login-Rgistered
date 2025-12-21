@@ -82,7 +82,7 @@ input[type="tel"]::placeholder {
     text-decoration: none;
 }
 
-#login-go-in-forgot , #phone-go-in-forgot-code , #login-go-in-code{
+#login-go-in-forgot , #phone-go-in-forgot-code ,#phone-go-in-change-password , #login-go-in-code{
     color: var(--input-icon) !important;
     text-decoration: none;
 }
@@ -102,7 +102,7 @@ input[type="tel"]::placeholder {
     border: solid 2px rgb(252, 173, 173);
     color: rgb(232, 27, 27);
 }
-#Error-login ,#Error-forgot-code ,#Error-forgot ,#Error-register ,#Error-login-tow{
+#Error-login ,#Error-forgot-code ,#Error-forgot ,#Error-register ,#Error-login-tow ,#Error-change-password{
     display: none;
 }
 
@@ -118,16 +118,16 @@ input[type="tel"]::placeholder {
     font-weight: bold;
     color: var(--main-purple) !important;
 }
-#time  ,#time-tow{
+#time-tow-forgot  ,#time-tow{
     color: var(--main-purple);
     font-weight: bold;
 }
-#recode ,#recode-tow {
+#recode-tow ,#recode-tow-forgot {
     display: none;
     text-decoration: none;
 }
 
-.otp-input {
+.otp-input , .otp-input-forgot{
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -135,7 +135,7 @@ input[type="tel"]::placeholder {
     direction: ltr; /* خیلی مهم */
 }
 
-.otp-input input {
+.otp-input input , .otp-input-forgot input{
     width: 48px;
     height: 56px;
     border-radius: 12px;
@@ -146,7 +146,7 @@ input[type="tel"]::placeholder {
     transition: 0.2s;
 }
 
-.otp-input input:focus {
+.otp-input input:focus , .otp-input-forgot input:focus {
     border-color: #8b5cf6;
     box-shadow: 0 0 0 2px rgba(130, 80, 246, 0.2);
 }
