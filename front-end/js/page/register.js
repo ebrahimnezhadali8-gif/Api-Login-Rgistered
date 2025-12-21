@@ -89,10 +89,8 @@ registerBtn.addEventListener("click", async () => {
   registerBtn.disabled = true;
   registerBtn.textContent = "در حال ارسال ...";
 
-  console.log("READY FOR BACKEND", payload);
   try {
     const data = await apiPost("/api/auth/register", payload);
-    console.log(data);
     showForm("sucesfull-registered");
     document.getElementById("message-succesfull-register").innerHTML =
       data.message;
