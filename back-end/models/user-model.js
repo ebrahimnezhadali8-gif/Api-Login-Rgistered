@@ -16,6 +16,13 @@ class UserModel {
     ]);
     return result;
   };
+  static updatePassword = async (id, password) => {
+    const result = await pool.query(`call update_pasword_user(? ,?)`, [
+      id,
+      password,
+    ]);
+    return result;
+  };
 }
 
 export default UserModel;
