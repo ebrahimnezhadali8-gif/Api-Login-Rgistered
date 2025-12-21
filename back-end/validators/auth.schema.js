@@ -71,3 +71,35 @@ export const otpSchema = Joi.object({
     "any.only": "نوع OTP معتبر نیست",
   }),
 });
+
+export const resendCode = Joi.object({
+  phone: Joi.string()
+    .trim()
+    .pattern(/^09\d{9}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "شماره تلفن معتبر نیست",
+    }),
+  type: Joi.string().valid("login", "forgot").required().messages({
+    "any.only": "نوع OTP معتبر نیست",
+  }),
+});
+export const changePasswordSchema = Joi.object({
+  phone: Joi.string()
+    .trim()
+    .pattern(/^09\d{9}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "شماره تلفن معتبر نیست",
+    }),
+
+  password: Joi.string()
+    .min(6)
+    .max(64)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "رمز عبور باید شامل حرف بزرگ، حرف کوچک، عدد و کاراکتر خاص باشد",
+    }),
+});
