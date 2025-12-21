@@ -13,7 +13,7 @@ export const registerLimiter = rateLimit({
 
 export const LoginLimiter = rateLimit({
   windowMs: 2 * 60 * 1000,
-  max: 5,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -24,7 +24,7 @@ export const LoginLimiter = rateLimit({
 
 export const otpLimiter = rateLimit({
   windowMs: 2 * 60 * 1000,
-  max: 5,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
