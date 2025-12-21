@@ -25,10 +25,6 @@ document.querySelector("#register-go").addEventListener("click", (e) => {
   e.preventDefault();
   showForm("rgister");
 });
-document.querySelector("#login-go-in-forgot").addEventListener("click", (e) => {
-  e.preventDefault();
-  showForm("login");
-});
 document.querySelector("#login-go-in-code").addEventListener("click", (e) => {
   e.preventDefault();
   showForm("login");
@@ -123,14 +119,22 @@ function updateUI() {
   secondsEl.textContent = String(s).padStart(2, "0");
 }
 
-resendEl.addEventListener("click", (e) => {
+resendEl.addEventListener("click", async (e) => {
   if (remainingTime > 0) return;
+
   e.preventDefault();
-
   remainingTime = 180;
-  startTimer();
+  const payload = {
+    type: "login",
+    phone: phoneUser,
+  };
 
-  // call backend resend otp
+  try {
+    const data = await apiPost("/api/auth/resendCode", payload);
+    startTimer();
+  } catch (error) {
+    showErrorMsg(error.message, "login-tow");
+  }
 });
 
 async function chechOtp() {
