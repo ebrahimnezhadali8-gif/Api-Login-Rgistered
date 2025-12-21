@@ -37,7 +37,8 @@ export const login = trycatchHandler(async (req, res) => {
   const code = generateCode();
   const hashedCode = hashCode(code);
 
-  console.log("OTP CODE :", code);
+  const codeUsed = await OtpModel.updateOtp(user[0].id, "login");
+  console.log("کد ورود شما :", code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
   await OtpModel.addOtp(user[0].id, hashedCode, "login", expire);
 
@@ -46,9 +47,10 @@ export const login = trycatchHandler(async (req, res) => {
   });
 });
 
-export const otpCheck = trycatchHandler(async (req, res) => {
+export const otpCheckLogin = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
   const user = await UserModel.getUserPhone(phone);
+  if (!user[0]) throw new AppError(401, "شماره نامعتبر است", 401);
   const otp = await OtpModel.getOtp(user[0].id, type);
   if (!otp[0]) throw new AppError(404, "کد نا معتبر است", 401);
   const codeHash = hashCode(code);
@@ -65,5 +67,59 @@ export const otpCheck = trycatchHandler(async (req, res) => {
     message: "ورود با موفقیت انجام شد",
     token: token,
     role: user[0].role,
+  });
+});
+
+export const sendCodeOtp = trycatchHandler(async (req, res) => {
+  const { phone, type } = req.body;
+  const user = await UserModel.getUserPhone(phone);
+  if (!user[0]) throw new AppError(401, "شماره نامعتبر است ", 401);
+
+  const code = generateCode();
+  const hashedCode = hashCode(code);
+
+  const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  if (type == "login") {
+    console.log("کد ورود شما :", code);
+  } else {
+    console.log("کد تایید شما :", code);
+  }
+  const expire = new Date(Date.now() + 3 * 60 * 1000);
+  await OtpModel.addOtp(user[0].id, hashedCode, type, expire);
+
+  res.status(200).json({
+    message: "کد به شماره شما ارسال شد ",
+  });
+});
+
+export const otpCheckForgot = trycatchHandler(async (req, res) => {
+  const { phone, code, type } = req.body;
+  const user = await UserModel.getUserPhone(phone);
+  if (!user[0]) throw new AppError(401, "شماره نامعتبر است", 401);
+  const otp = await OtpModel.getOtp(user[0].id, type);
+  if (!otp[0]) throw new AppError(404, "کد نا معتبر است", 401);
+  const codeHash = hashCode(code);
+  if (otp[0].code !== codeHash)
+    throw new AppError(401, "کد نا معتبر است ", 401);
+
+  const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  res.status(200).json({
+    message: "ورود با موفقیت انجام شد",
+  });
+});
+
+export const updatePassword = trycatchHandler(async (req, res) => {
+  const { phone, password } = req.body;
+  const exists = await UserModel.getUserPhone(phone.trim());
+  if (!exists.length) {
+    throw new AppError(404, "شماره نامعتبر می باشد", 404);
+  }
+
+  const hashPassword = await bcrypt.hash(password, 12);
+  await UserModel.updatePassword(exists[0].id, hashPassword);
+
+  res.status(201).json({
+    success: true,
+    message: "تغییر رمز عبور با موفقیت انجام شد",
   });
 });
