@@ -14,8 +14,8 @@ page login
 - Automatic deletion of expired or used OTPs using MySQL events.
 - Password hashing with bcrypt.
 - Rate limiting for OTP requests to prevent abuse.
-- Node.js backend with MySQL database.
-- Frontend integration (HTML/CSS/JS).
+- Node.js and Express backend with MySQL database.
+- Frontend integration (HTML/CSS/JS/BOOTSTRAP).
 
 ## Installation
 
