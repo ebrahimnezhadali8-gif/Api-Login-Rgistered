@@ -25,7 +25,7 @@ page login
     git clone https://github.com/ebrahimnezhadali8-gif/Api-Login-Rgistered.git
     cd Api-Login-Rgistered
 ```
-2. Install backend dependencies: cd back-end
+2. Install backend dependencies: `cd back-end`
 `npm install`
 
 3. Configure MySQL database:
