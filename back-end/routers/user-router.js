@@ -27,6 +27,11 @@ router.post("/login", LoginLimiter, validate(loginSchema), login);
 router.post("/codeOtp", otpLimiter, validate(otpSchema), otpCheckLogin);
 router.post("/resendCode", otpLimiter, validate(resendCode), sendCodeOtp);
 router.post("/forgotOtp", otpLimiter, validate(otpSchema), otpCheckForgot);
-router.post("/changePassword" , registerLimiter , validate(changePasswordSchema) , updatePassword)
+router.post(
+  "/changePassword",
+  registerLimiter,
+  validate(changePasswordSchema),
+  updatePassword
+);
 
 export default router;
