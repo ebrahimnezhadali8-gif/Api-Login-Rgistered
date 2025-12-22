@@ -20,7 +20,7 @@ Two-step login and registration system with password recovery and OTP verificati
 ```bash
     git clone https://github.com/ebrahimnezhadali8-gif/Api-Login-Rgistered.git
     cd Api-Login-Rgistered
-
+```
 2. Install backend dependencies: cd back-end
 npm install
 
