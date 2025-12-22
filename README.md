@@ -22,11 +22,11 @@ Two-step login and registration system with password recovery and OTP verificati
     cd Api-Login-Rgistered
 ```
 2. Install backend dependencies: cd back-end
-npm install
+`npm install`
 
 3. Configure MySQL database:
 
-Create a database (e.g., api_login).
+Create a database (api_login).
 
 Import SQL files in this order:
 a. table_users.sql
