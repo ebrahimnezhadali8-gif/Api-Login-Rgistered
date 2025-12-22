@@ -33,8 +33,11 @@ page login
 Create a database (api_login).
 
 Import SQL files in this order:
+
 a. table_users.sql
+
 b. table_otp.sql
+
 c. proceduer.sql
 
 4. Set environment variables in .env file
