@@ -3,7 +3,7 @@
 A simple and secure API for user registration, login, and password recovery using OTP (One-Time Password) verification.  
 This project is built with **Node.js**, **Express**, and **MySQL**, and includes proper database structure with stored procedures and automated OTP cleanup.
 
-<img src="assets/screenshot.png" alt="Screenshot" width="400">
+<img src="./front-end/image/login.png" alt="Screenshot" width="400">
 
 ## Features
 
