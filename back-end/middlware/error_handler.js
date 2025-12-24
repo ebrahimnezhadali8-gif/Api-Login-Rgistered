@@ -1,23 +1,32 @@
 import AppError from "../utilites/app_error.js";
-import logger from "../utilites/winston_loger.js";
+import { logError } from "../utilites/logger.js";
 
-const errorHandler = (error, req, res, next) => {
-  if (error.name === "ValidationError") {
-    logger.warn(`Validation failed: ${error.message}`);
-    return res.status(400).send("validation is failed");
+const errorHandler = (err, req, res, next) => {
+  const requestId = req.requestId || "unknown";
+  const userId = req.userId || null;
+
+  logError({
+    requestId,
+    userId,
+    message: err.message,
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method,
+    statusCode: err.statusCode || 500,
+  });
+
+  if (err.name === "ValidationError") {
+    return res.status(400).json({ message: "Validation failed" });
   }
-  if (error instanceof AppError) {
-    logger.error(
-      `AppError: ${error.message} | Code: ${error.errorCode} | Path: ${req.originalUrl}`
-    );
-    return res
-      .status(error.statusCode)
-      .send({ errorCode: error.errorCode, message: error.message });
+
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      errorCode: err.errorCode,
+      message: err.message,
+    });
   }
-  logger.error(
-    `Unhandled error: ${error.message} | Stack: ${error.stack} | Path: ${req.originalUrl}`
-  );
-  res.status(400).send("some thing failed");
+
+  return res.status(500).json({ message: "خطای سرور" });
 };
 
 export default errorHandler;
