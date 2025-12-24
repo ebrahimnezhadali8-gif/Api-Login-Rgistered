@@ -16,20 +16,23 @@ import {
 } from "../controllers/auth-controller.js";
 import { validate } from "../middlware/validate.js";
 import {
-  LoginLimiter,
+  changePasswordLimiter,
+  loginLimiter,
+  otpForgotLimiter,
   otpLimiter,
+  otpResendLimiter,
   registerLimiter,
 } from "../middlware/rate-limit.js";
 const router = express.Router();
 
 router.post("/register", registerLimiter, validate(registerSchema), register);
-router.post("/login", LoginLimiter, validate(loginSchema), login);
+router.post("/login", loginLimiter, validate(loginSchema), login);
 router.post("/codeOtp", otpLimiter, validate(otpSchema), otpCheckLogin);
-router.post("/resendCode", otpLimiter, validate(resendCode), sendCodeOtp);
-router.post("/forgotOtp", otpLimiter, validate(otpSchema), otpCheckForgot);
+router.post("/resendCode", otpResendLimiter, validate(resendCode), sendCodeOtp);
+router.post("/forgotOtp", otpForgotLimiter, validate(otpSchema), otpCheckForgot);
 router.post(
   "/changePassword",
-  registerLimiter,
+  changePasswordLimiter,
   validate(changePasswordSchema),
   updatePassword
 );
