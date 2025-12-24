@@ -8,7 +8,7 @@ export const validate = (schema) => (req, res, next) => {
 
   if (error) {
     throw new AppError(
-      400,
+      "ERROR_VALIDATION",
       error.details.map((e) => e.message).join(" | "),
       400
     );
