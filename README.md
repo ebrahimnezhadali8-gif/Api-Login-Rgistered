@@ -16,6 +16,9 @@ page login
 - Rate limiting for OTP requests to prevent abuse.
 - Node.js and Express backend with MySQL database.
 - Frontend integration (HTML/CSS/JS/BOOTSTRAP).
+- Logs are stored in daily files (YYYY-MM-DD.log).
+- Error logs are separated from general logs.
+- Old logs are automatically removed after a defined retention period
 
 ## Installation
 
