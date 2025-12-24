@@ -11,9 +11,12 @@ export const register = trycatchHandler(async (req, res) => {
 
   const exists = await UserModel.getUserPhone(phone);
   if (exists.length) {
-    throw new AppError(109, "این شماره تلفن قبلاً ثبت نام کرده است", 409);
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHONE",
+      message: "این شماره تلفن قبلاً ثبت نام کرده است",
+      statusCode: 409,
+    });
   }
-
   const hashPassword = await bcrypt.hash(password, 12);
 
   await UserModel.addUser(name, phone, hashPassword);
@@ -28,17 +31,26 @@ export const login = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
   const user = await UserModel.getUserPhone(phone);
   if (!user.length) {
-    throw new AppError(101, "شماره تلفن یا رمز عبور اشتباه است", 401);
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHONE",
+      message: "شماره تلفن یا رمز عبور اشتباه است",
+      statusCode: 401,
+    });
   }
   const validPassword = await bcrypt.compare(password, user[0].password);
-  if (!validPassword)
-    throw new AppError(101, "شماره تلفن یا رمز عبور اشتباه است", 401);
+  if (!validPassword) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHONE",
+      message: "شماره تلفن یا رمز عبور اشتباه است",
+      statusCode: 401,
+    });
+  }
 
   const code = generateCode();
   const hashedCode = hashCode(code);
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, "login");
-  console.log("کد ورود شما :", code);
+  console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
   await OtpModel.addOtp(user[0].id, hashedCode, "login", expire);
 
@@ -50,12 +62,29 @@ export const login = trycatchHandler(async (req, res) => {
 export const otpCheckLogin = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
   const user = await UserModel.getUserPhone(phone);
-  if (!user[0]) throw new AppError(401, "شماره نامعتبر است", 401);
+  if (!user[0]) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHONE",
+      message: "شماره نامعتبر است",
+      statusCode: 401,
+    });
+  }
   const otp = await OtpModel.getOtp(user[0].id, type);
-  if (!otp[0]) throw new AppError(404, "کد نا معتبر است", 401);
+  if (!otp[0]) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_CODE_OTP",
+      message: "کد نا معتبر است",
+      statusCode: 401,
+    });
+  }
   const codeHash = hashCode(code);
-  if (otp[0].code !== codeHash)
-    throw new AppError(401, "کد نا معتبر است ", 401);
+  if (otp[0].code !== codeHash) {
+    throw new AppError({
+      errorCode: "ERROR_CODE_OTP",
+      message: "کد نا معتبر است ",
+      statusCode: 401,
+    });
+  }
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, type);
   const token = jwt.sign(
@@ -73,16 +102,22 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
 export const sendCodeOtp = trycatchHandler(async (req, res) => {
   const { phone, type } = req.body;
   const user = await UserModel.getUserPhone(phone);
-  if (!user[0]) throw new AppError(401, "شماره نامعتبر است ", 401);
+  if (!user[0]) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHON",
+      message: "شماره نامعتبر است ",
+      statusCode: 401,
+    });
+  }
 
   const code = generateCode();
   const hashedCode = hashCode(code);
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, type);
   if (type == "login") {
-    console.log("کد ورود شما :", code);
+    console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   } else {
-    console.log("کد تایید شما :", code);
+    console.log("کد تایید شما :", `شماره شما: ${phone}`, code);
   }
   const expire = new Date(Date.now() + 3 * 60 * 1000);
   await OtpModel.addOtp(user[0].id, hashedCode, type, expire);
@@ -95,12 +130,29 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 export const otpCheckForgot = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
   const user = await UserModel.getUserPhone(phone);
-  if (!user[0]) throw new AppError(401, "شماره نامعتبر است", 401);
+  if (!user[0]) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHON",
+      message: "شماره نامعتبر است ",
+      statusCode: 401,
+    });
+  }
   const otp = await OtpModel.getOtp(user[0].id, type);
-  if (!otp[0]) throw new AppError(404, "کد نا معتبر است", 401);
+  if (!otp[0]) {
+    throw new AppError({
+      errorCode: "NOT_FOUND_CODE_OTP",
+      message: "کد نا معتبر است",
+      statusCode: 401,
+    });
+  }
   const codeHash = hashCode(code);
-  if (otp[0].code !== codeHash)
-    throw new AppError(401, "کد نا معتبر است ", 401);
+  if (otp[0].code !== codeHash) {
+    throw new AppError({
+      errorCode: "ERROR_CODE_OTP",
+      message: "کد نامعتبر است ",
+      statusCode: 401,
+    });
+  }
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, type);
   res.status(200).json({
@@ -112,7 +164,11 @@ export const updatePassword = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
   const exists = await UserModel.getUserPhone(phone.trim());
   if (!exists.length) {
-    throw new AppError(404, "شماره نامعتبر می باشد", 404);
+    throw new AppError({
+      errorCode: "NOT_FOUND_PHON",
+      message: "شماره نامعتبر است ",
+      statusCode: 404,
+    });
   }
 
   const hashPassword = await bcrypt.hash(password, 12);
