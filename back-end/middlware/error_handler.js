@@ -12,6 +12,7 @@ const errorHandler = (err, req, res, next) => {
     stack: err.stack,
     path: req.originalUrl,
     method: req.method,
+    ip: req.ip,
     statusCode: err.statusCode || 500,
   });
 
