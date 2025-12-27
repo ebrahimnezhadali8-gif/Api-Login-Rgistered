@@ -19,6 +19,7 @@ page login
 - Logs are stored in daily files (YYYY-MM-DD.log).
 - Error logs are separated from general logs.
 - Old logs are automatically removed after a defined retention period
+- OTP SMS system sending login and authentication SMS to users
 
 ## Installation
 
