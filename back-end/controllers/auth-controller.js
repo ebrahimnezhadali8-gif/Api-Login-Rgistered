@@ -5,6 +5,7 @@ import { trycatchHandler } from "../utilites/trycatch_handler.js";
 import { generateCode, hashCode } from "../services/generate-code.js";
 import OtpModel from "../models/otp-user-model.js";
 import jwt from "jsonwebtoken";
+import { sendOtp } from "../api-message/send-templet.js";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
@@ -50,6 +51,7 @@ export const login = trycatchHandler(async (req, res) => {
   const hashedCode = hashCode(code);
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, "login");
+  await sendOtp(phone , code , "login")
   console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
   await OtpModel.addOtp(user[0].id, hashedCode, "login", expire);
@@ -114,6 +116,7 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
   const hashedCode = hashCode(code);
 
   const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  await sendOtp(phone , code ,type)
   if (type == "login") {
     console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   } else {
