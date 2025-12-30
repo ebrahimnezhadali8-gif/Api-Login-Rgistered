@@ -6,6 +6,10 @@ class UserModel {
     const [result] = await pool.query(`call get_user_phone(?)`, [phone]);
     return result[0];
   };
+  static getUserId = async (id) => {
+    const [result] = await pool.query(`call get_user_id(?)`, [id]);
+    return result[0];
+  };
   static addUser = async (name, phone, password) => {
     const id = uuidv4(); //create uuid
     const result = await pool.query(`call insert_user(?,?,?,?)`, [
