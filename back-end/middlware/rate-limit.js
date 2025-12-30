@@ -74,3 +74,13 @@ export const changePasswordLimiter = rateLimit({
     message: "تعداد تلاش بیش از حد مجاز است، بعداً دوباره امتحان کنید",
   },
 });
+
+export const TokenLimiter = rateLimit({
+  ...baseLimiter,
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    status: 429,
+    message: "تعداد تلاش بیش از حد مجاز است، بعداً دوباره امتحان کنید",
+  },
+});
