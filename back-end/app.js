@@ -1,14 +1,20 @@
 import cors from "cors";
 import express from "express";
 const app = express();
-import userRouter from "./routers/user-router.js";
+import authRouter from "./routers/auth-router.js";
 import errorHandler from "./middlware/error_handler.js";
 import reqContext from "./middlware/req-context.js";
 import { httpLogger } from "./middlware/http-log.js";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import userRouter from "./routers/user-router.js";
 
-app.set("trust proxy", true);
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5500", // دقیقاً مطابق با آدرس مرورگر
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(
   helmet({
@@ -20,12 +26,11 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
+app.use(cookieParser());
 app.use(reqContext);
 app.use(httpLogger);
-app.get("/", (req, res) => {
-  res.send("Login API is running...");
-});
-app.use("/api/auth", userRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 app.use(errorHandler);
 
 export default app;
