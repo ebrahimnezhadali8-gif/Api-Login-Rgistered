@@ -8,3 +8,4 @@ export function generateCode() {
 export function hashCode(key) {
   return crypto.createHash("sha256").update(key).digest("hex");
 }
+
