@@ -1,3 +1,4 @@
+import { setAuth } from "../auth/auth-store.js";
 import { apiPost } from "../public/api.js";
 import { showForm } from "../public/change-page.js";
 import { showErrorMsg } from "../public/show-message.js";
@@ -155,8 +156,7 @@ async function chechOtp() {
 
   try {
     const data = await apiPost("/api/auth/codeOtp", payload);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.role);
+    setAuth(data.accessToken, data.role);
     setTimeout(() => {
       window.location.href = `./${data.role}/dashboard.html`;
     }, 1000);
