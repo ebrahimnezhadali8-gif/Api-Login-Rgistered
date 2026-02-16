@@ -11,7 +11,7 @@ import userRouter from "./routers/user-router.js";
 
 app.use(
   cors({
-    origin: "http://127.0.0.1:5500", // دقیقاً مطابق با آدرس مرورگر
+    origin: "http://127.0.0.1:5500",
     credentials: true,
   })
 );
