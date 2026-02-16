@@ -10,6 +10,6 @@ export async function logout() {
     console.error("Logout error:", err);
   } finally {
     clearAuth(); 
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
   }
 }

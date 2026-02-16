@@ -1,4 +1,6 @@
 import { apiGet } from "../api/api.js";
+import { clearAuth } from "../auth/auth-store.js";
+import { logout } from "../auth/logout.js";
 let phoneUser = null;
 let roleUser = null;
 const eye = document.getElementById("eye");
@@ -6,7 +8,8 @@ const uneye = document.getElementById("uneye");
 const phone = document.getElementById("phone");
 const role = document.getElementById("role-user");
 const phoneUpdate = document.getElementById("phone-update");
-const roleUpdate = document.getElementById("role-update") 
+const roleUpdate = document.getElementById("role-update");
+const buttonLogout = document.querySelector("#button-login");
 
 function maskPhone(phone) {
   return phone.slice(0, 4) + "***" + phone.slice(-3);
@@ -25,7 +28,7 @@ async function loadProfile() {
     name.innerHTML = data.name;
     role.innerHTML = data.role;
     phoneUser = data.phone;
-    roleUser = data.role ==="user" ? "کاربر" : "ادمین" 
+    roleUser = data.role === "user" ? "کاربر" : "ادمین";
     role.innerHTML = roleUser;
     const phoneMask = maskPhone(phoneUser);
     phone.innerHTML = phoneMask;
@@ -41,5 +44,10 @@ uneye.addEventListener("click", () => {
   uneye.classList.remove("active");
   eye.classList.add("active");
   phone.innerHTML = maskPhone(phoneUser);
+});
+
+buttonLogout.addEventListener("click", () => {
+  clearAuth();
+  window.location.href = "../index.html";
 });
 
