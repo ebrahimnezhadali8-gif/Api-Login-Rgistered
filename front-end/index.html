@@ -129,7 +129,8 @@
             <div class="my-3 text-start">
             <div class="otp-input-forgot">
                 <input type="text" maxlength="1" inputmode="numeric">
-                <input type="text" maxlength="1" inputmode="numeric">                    <input type="text" maxlength="1" inputmode="numeric">
+                <input type="text" maxlength="1" inputmode="numeric">                    
+                <input type="text" maxlength="1" inputmode="numeric">
                 <input type="text" maxlength="1" inputmode="numeric">
                 <input type="text" maxlength="1" inputmode="numeric">
                 <input type="text" maxlength="1" inputmode="numeric">
@@ -179,7 +180,7 @@
             </div>
             <section id="Error-change-password">
                 <div class="alert container message" id="error-message-change-password">
-            لطفا پسوورد خود را وارد کنید
+            لطفا رمز عبور خود را وارد کنید
         </div>
       </section>
             <div class="d-grid mt-4">
@@ -249,6 +250,70 @@
             </div>
             <div class="mt-2 text-center text-Secondary mt-3">
                 <a href="#" class="h7 text-primary-emphasis" id="login-go-in-code"><i class="bi bi-arrow-right"></i> بازگشت </a>
+            </div>
+        </form>
+        <form class="auth-form" id="register-phone">
+            <div class="icons">
+                <i class="bi bi-telephone-plus icon"></i>
+            </div>
+            <div class="h5 text-center text-Secondary"> ثبت نام</div>
+            <div class="h7 text-center text-secondary"> شماره تلفن خود را وارد کنید تا کد تایید برای شما ارسال شود</div>
+            <div class="my-3 text-start">
+                <label for="exampleInputPhone" class="form-label">شماره تلفن</label>
+                <div class="input">
+                    <i class="bi bi-telephone"></i>
+                    <input type="tel" dir="rtl" inputmode="numeric" pattern="^09[0-9]{9}" class="form-control p-3" id="phone-input-register-phone" placeholder="شماره تلفن خود را وارد کنید">
+                </div>
+            </div>
+            <section id="Error-register-phone">
+                <div class="alert container message" id="error-message-register-phone">
+                    لطفا شماره خود را وارد کنید     
+                </div>
+            </section>
+            <div class="d-grid mt-4">
+                <button type="button" class="btn btn-secondary btn-block p-3 button" id="button-register-phone">ارسال کد تایید</button>
+            </div>
+            <div class="mt-2 text-center text-Secondary">
+                <a href="#" class="h6 text-primary-emphasis" id="login-go-in-register-phone"><i class="bi bi-arrow-right"></i> بازگشت به صفحه ورود</a>
+            </div>
+        </form>
+        <form class="auth-form" id="register-phone-code">
+            <div class="icons">
+                <i class="bi bi-shield-lock icon"></i>
+            </div>
+            <div class="h7 text-center text-secondary"> کد تایید ارسال شده به شماره زیر را وارد کنید</div>
+            <div class="h7 text-center text-secondary" id="phone-register-code"> 09922073575</div>
+            <div class="h7 text-center text-Secondary mt-3"> کد تأیید ۶ رقمی</div>
+            <div class="my-3 text-start">
+            <div class="otp-input-forgot">
+                <input type="text" maxlength="1" inputmode="numeric">
+                <input type="text" maxlength="1" inputmode="numeric">                    
+                <input type="text" maxlength="1" inputmode="numeric">
+                <input type="text" maxlength="1" inputmode="numeric">
+                <input type="text" maxlength="1" inputmode="numeric">
+                <input type="text" maxlength="1" inputmode="numeric">
+            </div>
+            </div>
+            <section id="Error-forgot-code">
+                <div class="alert container message" id="error-message-register-phone-code">
+           کد شش رقمی را وارد کنید
+                </div>
+            </section>
+            <div class="d-grid mt-4">
+                <button type="button" class="btn btn-secondary btn-block p-3 button" id="button-forgot-code"> تایید </button>
+            </div>
+            <div class="mt-2 text-center text-Secondary">
+                <a href="#" class="h6 text-primary-emphasis" id="recode-register-phone">ارسال مجدد کد</a>
+                <div class="timer">
+                    <span>ارسال مجدد کد در 
+                        <span id="time-register-phone">
+                            <span id="minutes-register-phone">02</span>:<span id="seconds-register-phone">00</span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <div class="mt-2 text-center text-Secondary mt-3">
+                <a href="#" class="h7 text-primary-emphasis" id="login-go-in-register-phone-code"><i class="bi bi-arrow-right"></i> بازگشت </a>
             </div>
         </form>
     </div>

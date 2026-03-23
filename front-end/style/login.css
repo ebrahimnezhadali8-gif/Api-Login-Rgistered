@@ -38,7 +38,7 @@ body{
 
 .icon-suc{
     font-size: 40px;
-    background: var(--succesful-icon);
+    background: var(--succesful-icon) !important;
     padding: 8px 16px;
     border-radius: 15px;
     color: white;
@@ -77,7 +77,7 @@ input[type="tel"]::placeholder {
     border-radius: 15px;
     box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.2);
 }
-#register-go  ,#login-go , #forgot-password , #recode{
+#register-go  ,#login-go , #forgot-password , #recode , #login-go-in-register-phone , #login-go-in-register-phone-code{
     color: var(--main-purple) !important;
     text-decoration: none;
 }
@@ -102,7 +102,7 @@ input[type="tel"]::placeholder {
     border: solid 2px rgb(252, 173, 173);
     color: rgb(232, 27, 27);
 }
-#Error-login ,#Error-forgot-code ,#Error-forgot ,#Error-register ,#Error-login-tow ,#Error-change-password{
+#Error-login ,#Error-forgot-code ,#Error-forgot ,#Error-register ,#Error-login-tow ,#Error-change-password ,#Error-register-phone {
     display: none;
 }
 
@@ -132,7 +132,7 @@ input[type="tel"]::placeholder {
     gap: 10px;
     justify-content: center;
     margin: 20px 0;
-    direction: ltr; /* خیلی مهم */
+    direction: ltr; 
 }
 
 .otp-input input , .otp-input-forgot input{
@@ -152,11 +152,11 @@ input[type="tel"]::placeholder {
 }
 
 .is-valid {
-    padding-right: 2.5rem;              /* جا برای آیکون */
-    background-image: url('') !important; /* حذف آیکون خود Bootstrap */
+    padding-right: 2.5rem;              
+    background-image: url('') !important; 
 }
 
 .is-invalid {  
     padding-right: 2.5rem;
-    background-image: url('') !important; /* حذف آیکون خود Bootstrap */
+    background-image: url('') !important; 
 }

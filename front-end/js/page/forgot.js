@@ -69,7 +69,7 @@ forgotBtn.addEventListener("click", async () => {
     showErrorMsg(error.message, "forgot");
   } finally {
     forgotBtn.disabled = false;
-    forgotBtn.textContent = "ورود";
+    forgotBtn.textContent = "ارسال کد بازیابی";
   }
 });
 

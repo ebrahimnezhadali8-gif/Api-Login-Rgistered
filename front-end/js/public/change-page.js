@@ -21,8 +21,14 @@ export function showForm(type) {
   if (type === "login-tow")
     document.querySelector("#login-tow").classList.add("active");
 
+  if (type === "register-phone")
+    document.querySelector("#register-phone").classList.add("active");
+
   if (type === "sucesfull-password")
     document.querySelector("#sucesfull-password").classList.add("active");
+
+  if (type === "register-phone-code")
+    document.querySelector("#register-phone-code").classList.add("active");
 
   if (type === "sucesfull-registered")
     document.querySelector("#sucesfull-registered").classList.add("active");

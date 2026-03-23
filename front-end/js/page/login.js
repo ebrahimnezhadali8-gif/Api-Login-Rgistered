@@ -24,7 +24,7 @@ document.querySelector("#forgot-password").addEventListener("click", (e) => {
 });
 document.querySelector("#register-go").addEventListener("click", (e) => {
   e.preventDefault();
-  showForm("rgister");
+  showForm("register-phone");
 });
 document.querySelector("#login-go-in-code").addEventListener("click", (e) => {
   e.preventDefault();
@@ -65,7 +65,6 @@ loginBtn.addEventListener("click", async () => {
 });
 // inputs code login tow
 inputs[0].focus();
-
 inputs.forEach((input, index) => {
   input.addEventListener("input", () => {
     input.value = input.value.replace(/[^0-9]/g, ""); //number
