@@ -12,10 +12,10 @@ const loginTowBtn = document.getElementById("button-login-code");
 let remainingTime;
 let timerInterval;
 let phoneUser;
-const timerEl = document.querySelector(".timer");
-const resendEl = document.querySelector("#recode-tow");
-const minutesEl = document.querySelector("#minutes");
-const secondsEl = document.querySelector("#seconds");
+const timerLoginEl = document.querySelector("#time-login");
+const resendLoginEl = document.querySelector("#recode-tow");
+const minutesLoginEl = document.querySelector("#minutes");
+const secondsLoginEl = document.querySelector("#seconds");
 const inputs = document.querySelectorAll(".otp-input input");
 //change form page
 document.querySelector("#forgot-password").addEventListener("click", (e) => {
@@ -92,8 +92,8 @@ startTimer();
 function startTimer() {
   clearInterval(timerInterval);
 
-  timerEl.style.display = "block";
-  resendEl.style.display = "none";
+  timerLoginEl.style.display = "block";
+  resendLoginEl.style.display = "none";
 
   updateUI();
 
@@ -102,8 +102,8 @@ function startTimer() {
 
     if (remainingTime <= 0) {
       clearInterval(timerInterval);
-      timerEl.style.display = "none";
-      resendEl.style.display = "block";
+      timerLoginEl.style.display = "none";
+      resendLoginEl.style.display = "block";
       return;
     }
 
@@ -115,11 +115,11 @@ function updateUI() {
   const m = Math.floor(remainingTime / 60);
   const s = remainingTime % 60;
 
-  minutesEl.textContent = String(m).padStart(2, "0");
-  secondsEl.textContent = String(s).padStart(2, "0");
+  minutesLoginEl.textContent = String(m).padStart(2, "0");
+  secondsLoginEl.textContent = String(s).padStart(2, "0");
 }
 
-resendEl.addEventListener("click", async (e) => {
+resendLoginEl.addEventListener("click", async (e) => {
   if (remainingTime > 0) return;
 
   e.preventDefault();
