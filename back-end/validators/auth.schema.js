@@ -67,7 +67,7 @@ export const otpSchema = Joi.object({
       "string.pattern.base": "کد تایید باید ۶ رقم عددی باشد",
     }),
 
-  type: Joi.string().valid("login", "forgot").required().messages({
+  type: Joi.string().valid("login", "forgot", "register").required().messages({
     "any.only": "نوع OTP معتبر نیست",
   }),
 });
@@ -80,7 +80,7 @@ export const resendCode = Joi.object({
     .messages({
       "string.pattern.base": "شماره تلفن معتبر نیست",
     }),
-  type: Joi.string().valid("login", "forgot" ,"register").required().messages({
+  type: Joi.string().valid("login", "forgot", "register").required().messages({
     "any.only": "نوع OTP معتبر نیست",
   }),
 });

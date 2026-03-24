@@ -9,13 +9,20 @@ import {
 
 const nameInputRegister = document.getElementById("name-input-register");
 const phoneInputRegister = document.getElementById("phone-input-register");
-const phoneInputRegisterPhone = document.getElementById("phone-input-register-phone");
+const phoneInputRegisterPhone = document.getElementById(
+  "phone-input-register-phone",
+);
 const passwordRegister = document.getElementById("password-input-register");
 const passwordTowRegister = document.getElementById(
-  "password-tow-input-register"
+  "password-tow-input-register",
 );
-let phoneUser ,remainingTime;
-const inputs = document.querySelectorAll(".otp-input-forgot input");
+const timerEl = document.querySelector("#time-rgister");
+const resendEl = document.querySelector("#recode-register-phone");
+const minutesEl = document.querySelector("#minutes-register-phone");
+const secondsEl = document.querySelector("#seconds-register-phone");
+const registerBtnCode = document.getElementById("button-register-code");
+let phoneUser, remainingTime, timerInterval;
+const inputs = document.querySelectorAll(".otp-input-register input");
 const registerBtn = document.getElementById("button-regiter");
 const registerPhoneBtn = document.getElementById("button-register-phone");
 const errorBoxRegister = document.getElementById("Error-register");
@@ -25,15 +32,23 @@ document.querySelector("#login-go").addEventListener("click", (e) => {
   e.preventDefault();
   showForm("login");
 });
-document.querySelector("#login-go-in-register-phone").addEventListener("click", (e) => {
-  e.preventDefault();
-  showForm("login");
-});
+document
+  .querySelector("#login-go-in-register-phone")
+  .addEventListener("click", (e) => {
+    e.preventDefault();
+    showForm("login");
+  });
 document
   .getElementById("button-register-go-to-login")
   .addEventListener("click", (e) => {
     e.preventDefault();
     showForm("login");
+  });
+document
+  .getElementById("login-go-in-register-phone-code")
+  .addEventListener("click", (e) => {
+    e.preventDefault();
+    showForm("register-phone");
   });
 //function class input
 function toggleValidation(input, isValid) {
@@ -48,18 +63,18 @@ passwordRegister.addEventListener("input", () => {
 nameInputRegister.addEventListener("blur", () => {
   toggleValidation(
     nameInputRegister,
-    validateNamePersian(nameInputRegister.value)
+    validateNamePersian(nameInputRegister.value),
   );
 });
 
-phoneInputRegister.addEventListener("blur", () => {
+phoneInputRegisterPhone.addEventListener("blur", () => {
   toggleValidation(
-    phoneInputRegister,
-    validateMobile(phoneInputRegister.value)
+    phoneInputRegisterPhone,
+    validateMobile(phoneInputRegisterPhone.value),
   );
 });
 
-registerPhoneBtn.addEventListener("click", async() => {
+registerPhoneBtn.addEventListener("click", async () => {
   errorBoxRegisterPhone.style.display = "none";
 
   const phoneValid = validateMobile(phoneInputRegisterPhone.value);
@@ -90,6 +105,110 @@ registerPhoneBtn.addEventListener("click", async() => {
   }
 });
 
+// inputs code forgot code
+inputs[0].focus();
+inputs.forEach((input, index) => {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, ""); //number
+    //next focus
+    if (input.value && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+    //end input
+    if (index === inputs.length - 1 && input.value) {
+      chechOtpRgister();
+    }
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+});
+registerBtnCode.addEventListener("click", (e) => {
+  e.preventDefault();
+  chechOtpRgister();
+});
+// Timer resend code
+startTimer();
+function startTimer() {
+  clearInterval(timerInterval);
+
+  timerEl.style.display = "block";
+  resendEl.style.display = "none";
+
+  updateUI();
+
+  timerInterval = setInterval(() => {
+    remainingTime--;
+
+    if (remainingTime <= 0) {
+      clearInterval(timerInterval);
+      timerEl.style.display = "none";
+      resendEl.style.display = "block";
+      return;
+    }
+
+    updateUI();
+  }, 1000);
+}
+
+function updateUI() {
+  const m = Math.floor(remainingTime / 60);
+  const s = remainingTime % 60;
+
+  minutesEl.textContent = String(m).padStart(2, "0");
+  secondsEl.textContent = String(s).padStart(2, "0");
+}
+
+resendEl.addEventListener("click", async (e) => {
+  if (remainingTime > 0) return;
+
+  e.preventDefault();
+  remainingTime = 180;
+  const payload = {
+    type: "register",
+    phone: phoneUser,
+  };
+  console.log(payload);
+  try {
+    const data = await apiPost("/api/auth/resendCode", payload);
+    startTimer();
+  } catch (error) {
+    showErrorMsg(error.message, "register-phone-code");
+  }
+});
+
+async function chechOtpRgister() {
+  let otp = "";
+  for (let input of inputs) {
+    if (!input.value) {
+      showErrorMsg("لطفا همه فیلد ها را پر کنبد", "register-phone-code");
+    }
+    otp += input.value;
+  }
+  registerBtnCode.disabled = true;
+  registerBtnCode.textContent = "در حال بررسی ...";
+  const payload = {
+    code: otp,
+    type: "register",
+    phone: phoneUser,
+  };
+
+  try {
+    const data = await apiPost("/api/auth/forgotOtp", payload);
+    showForm("register");
+    phoneInputRegister.value = phoneUser;
+    lockInput(phoneInputRegister);
+    remainingTime = 0;
+  } catch (error) {
+    showErrorMsg(error.message, "register-phone-code");
+  } finally {
+    registerBtnCode.disabled = false;
+    registerBtnCode.textContent = "تایید";
+  }
+}
+
 registerBtn.addEventListener("click", async () => {
   errorBoxRegister.style.display = "none";
 
@@ -101,7 +220,7 @@ registerBtn.addEventListener("click", async () => {
   if (!nameValid) {
     showErrorMsg(
       "نام و نام خانوادگی حداقل سه کارکتر و به صورت صحیح وارد شود",
-      "register"
+      "register",
     );
     return;
   }
@@ -112,7 +231,7 @@ registerBtn.addEventListener("click", async () => {
   if (!passwordValid) {
     showErrorMsg(
       "رمز عبور باید شامل حرف بزرگ، حرف کوچک، عدد و کاراکتر خاص باشد",
-      "register"
+      "register",
     );
     return;
   }
@@ -123,7 +242,7 @@ registerBtn.addEventListener("click", async () => {
 
   const payload = {
     name: nameInputRegister.value.trim(),
-    phone: phoneInputRegister.value,
+    phone: phoneUser,
     password: passwordRegister.value,
   };
   registerBtn.disabled = true;
@@ -141,3 +260,10 @@ registerBtn.addEventListener("click", async () => {
     registerBtn.innerHTML = "ثبت نام";
   }
 });
+function lockInput(inputEl) {
+  inputEl.disabled = true;
+  inputElreadOnly = true;
+
+  inputEl.style.backgroundColor = "#f8f9fa";
+  inputEl.style.Color = "#585e64";
+}

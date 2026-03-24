@@ -6,7 +6,7 @@ export function showForm(type) {
   if (type === "login")
     document.querySelector("#login-form").classList.add("active");
 
-  if (type === "rgister")
+  if (type === "register")
     document.querySelector("#register").classList.add("active");
 
   if (type === "forgot")

@@ -17,7 +17,7 @@ export const register = trycatchHandler(async (req, res) => {
   const exists = await UserModel.getUserPhone(phone);
   if (exists.length) {
     throw new AppError({
-      errorCode: "NOT_FOUND_PHONE",
+      errorCode: "FOUND_PHONE",
       message: "این شماره تلفن قبلاً ثبت نام کرده است",
       statusCode: 409,
     });
@@ -92,7 +92,7 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     });
   }
 
-  const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  const codeUsed = await OtpModel.updateOtp(phone, type);
   const accessToken = AccessToken(user[0]);
   const refreshToken = RefreshToken(user[0]);
   const hashToken = hashCode(refreshToken);
@@ -153,14 +153,17 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 
 export const otpCheckForgot = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
-  const user = await UserModel.getUserPhone(phone);
-  if (!user[0]) {
-    throw new AppError({
-      errorCode: "NOT_FOUND_PHON",
-      message: "شماره نامعتبر است ",
-      statusCode: 401,
-    });
+  if (type == "login" && "forgot") {
+    const user = await UserModel.getUserPhone(phone);
+    if (!user[0]) {
+      throw new AppError({
+        errorCode: "NOT_FOUND_PHON",
+        message: "شماره نامعتبر است ",
+        statusCode: 401,
+      });
+    }
   }
+
   const otp = await OtpModel.getOtp(phone, type);
   if (!otp[0]) {
     throw new AppError({
@@ -178,7 +181,7 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     });
   }
 
-  const codeUsed = await OtpModel.updateOtp(user[0].id, type);
+  const codeUsed = await OtpModel.updateOtp(phone, type);
   res.status(200).json({
     message: "ورود با موفقیت انجام شد",
   });
