@@ -7,9 +7,10 @@ import OtpModel from "../models/otp-user-model.js";
 import jwt from "jsonwebtoken";
 import { sendOtp } from "../api-message/send-templet.js";
 import { AccessToken, RefreshToken } from "../utilites/token.js";
-import dotenv from "dotenv";
+//import dotenv from "dotenv";
 import TokenModel from "../models/token_model.js";
-dotenv.config({ path: "../.env" });
+//dotenv.config({ path: "../.env" });
+import config from "config";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
@@ -212,7 +213,7 @@ export const refresh = async (req, res) => {
   if (!token) throw new AppError("NO_REFRESH", "Unauthorized", 401);
 
   const hashToken = hashCode(token);
-  const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const payload = jwt.verify(token, config.get('jwt.accessTokenSecret') /*process.env.ACCESS_TOKEN_SECRET*/);
 
   const user = await UserModel.getUserId(payload.sub);
   if (user[0].token !== payload.token) {
@@ -241,7 +242,7 @@ export async function logout(req, res, next) {
       return res.sendStatus(204);
     }
     const tokenHash = hashCode(refreshToken);
-    const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const payload = jwt.verify(token, config.get('jwt.refreshTokenSecret') /*process.env.REFRESH_TOKEN_SECRET*/);
     const token = await TokenModel.getTokenInUserId(payload.sub);
     if (!token[0]) return res.sendStatus(204);
 
