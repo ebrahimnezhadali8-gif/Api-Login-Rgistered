@@ -4,7 +4,7 @@ import app from "./app.js";
 import config from "config";
 
 const port = config.get('app.port');
-console.log(port , config.get('database.host'))
+console.log(port , config.get('database.pool.idle'))
 // const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
