@@ -1,22 +1,25 @@
 import bcrypt from "bcrypt";
-import UserModel from "../models/user-model.js";
 import AppError from "../utilites/app_error.js";
 import { trycatchHandler } from "../utilites/trycatch_handler.js";
 import { generateCode, hashCode } from "../services/generate-code.js";
-import OtpModel from "../models/otp-user-model.js";
-import jwt from "jsonwebtoken";
-import { sendOtp } from "../api-message/send-templet.js";
+// import jwt from "jsonwebtoken";
+// import { sendOtp } from "../services/send-templet.js";
 import { AccessToken, RefreshToken } from "../utilites/token.js";
-//import dotenv from "dotenv";
-import TokenModel from "../models/token_model.js";
-//dotenv.config({ path: "../.env" });
-import config from "config";
+import db from "../models/index.js";
+const { User, Otp } = db;
+import { v4 as uuidv4 } from "uuid";
+import { Sequelize, Op } from "sequelize";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
 
-  const exists = await UserModel.getUserPhone(phone);
-  if (exists.length) {
+  //const exists = await UserModel.getUserPhone(phone);
+  const exists = await User.findOne({
+    where: {
+      phone: phone,
+    },
+  });
+  if (exists) {
     throw new AppError({
       errorCode: "FOUND_PHONE",
       message: "این شماره تلفن قبلاً ثبت نام کرده است",
@@ -25,7 +28,14 @@ export const register = trycatchHandler(async (req, res) => {
   }
   const hashPassword = await bcrypt.hash(password, 12);
 
-  await UserModel.addUser(name, phone, hashPassword);
+  // await UserModel.addUser(name, phone, hashPassword);
+  const id = uuidv4();
+  await User.create({
+    id: id,
+    name: name,
+    phone: phone,
+    password: hashPassword,
+  });
 
   res.status(201).json({
     success: true,
@@ -35,15 +45,21 @@ export const register = trycatchHandler(async (req, res) => {
 
 export const login = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
-  const user = await UserModel.getUserPhone(phone);
-  if (!user.length) {
+  // const user = await UserModel.getUserPhone(phone);
+  const user = await User.findOne({
+    where: {
+      phone: phone,
+    },
+  });
+  console.log(user);
+  if (!user) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHONE",
       message: "شماره تلفن یا رمز عبور اشتباه است",
       statusCode: 401,
     });
   }
-  const validPassword = await bcrypt.compare(password, user[0].password);
+  const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHONE",
@@ -55,11 +71,30 @@ export const login = trycatchHandler(async (req, res) => {
   const code = generateCode();
   const hashedCode = hashCode(code);
 
-  const codeUsed = await OtpModel.updateOtp(phone, "login");
+  //const codeUsed = await OtpModel.updateOtp(phone, "login");
+  const codeUsed = await Otp.update(
+    {
+      used_at: Sequelize.fn("now"), // یا new Date()
+    },
+    {
+      where: {
+        phone: phone,
+        used_at: null,
+        type: "login",
+      },
+    },
+  );
+
   //await sendOtp(phone, code, "login");
   console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
-  await OtpModel.addOtp(phone, hashedCode, "login", expire);
+  // await OtpModel.addOtp(phone, hashedCode, "login", expire);
+  await Otp.create({
+    phone: phone,
+    code: hashedCode,
+    type: "login",
+    expires_at: expire,
+  });
 
   res.status(200).json({
     message: "کد به شماره شما ارسال شد ",
@@ -68,16 +103,31 @@ export const login = trycatchHandler(async (req, res) => {
 
 export const otpCheckLogin = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
-  const user = await UserModel.getUserPhone(phone);
-  if (!user[0]) {
+  // const user = await UserModel.getUserPhone(phone);
+  const user = await User.findOne({
+    where: {
+      phone: phone,
+    },
+  });
+  if (!user) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHONE",
       message: "شماره نامعتبر است",
       statusCode: 401,
     });
   }
-  const otp = await OtpModel.getOtp(phone, type);
-  if (!otp[0]) {
+  // const otp = await OtpModel.getOtp(phone, type);
+  const otp = await Otp.findOne({
+    where: {
+      phone: phone,
+      expires_at: {
+        [Op.gt]: Sequelize.fn("now"), // expires_at > now()
+      },
+      used_at: null,
+      type: type,
+    },
+  });
+  if (!otp) {
     throw new AppError({
       errorCode: "NOT_FOUND_CODE_OTP",
       message: "کد نا معتبر است",
@@ -85,7 +135,7 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     });
   }
   const codeHash = hashCode(code);
-  if (otp[0].code !== codeHash) {
+  if (otp.code !== codeHash) {
     throw new AppError({
       errorCode: "ERROR_CODE_OTP",
       message: "کد نا معتبر است ",
@@ -93,31 +143,48 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     });
   }
 
-  const codeUsed = await OtpModel.updateOtp(phone, type);
-  const accessToken = AccessToken(user[0]);
-  const refreshToken = RefreshToken(user[0]);
-  const hashToken = hashCode(refreshToken);
-  res.cookie("refreshToken", refreshToken, {
+  // const codeUsed = await OtpModel.updateOtp(phone, type);
+  const codeUsed = await Otp.update(
+    {
+      used_at: Sequelize.fn("now"), // یا new Date()
+    },
+    {
+      where: {
+        phone: phone,
+        used_at: null,
+        type: type,
+      },
+    },
+  );
+  const accessToken = AccessToken(user);
+  // const refreshToken = RefreshToken(user[0]);
+  // const hashToken = hashCode(refreshToken);
+  /* res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: false, // چون http هست
     sameSite: "none", // "strict" روی POST هم فرستاده می‌شه
     maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-  console.log(" cookie set");
-  const time_expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  }); */
+  // console.log(" cookie set");
+  // const time_expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  await TokenModel.insertToken(user[0].id, hashToken, time_expires);
+  // await TokenModel.insertToken(user.id, hashToken, time_expires);
   res.status(200).json({
     accessToken,
-    role: user[0].role,
+    role: user.role,
   });
 });
 
 export const sendCodeOtp = trycatchHandler(async (req, res) => {
   const { phone, type } = req.body;
-  const user = await UserModel.getUserPhone(phone);
+  //const user = await UserModel.getUserPhone(phone);
+  const user = await User.findOne({
+    where: {
+      phone: phone,
+    },
+  });
   if (type === "register") {
-    if (user[0]) {
+    if (user) {
       throw new AppError({
         errorCode: "FOUND_PHON",
         message: "شما قبلا ثبت نام کرده اید ",
@@ -125,7 +192,7 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
       });
     }
   } else {
-    if (!user[0]) {
+    if (!user) {
       throw new AppError({
         errorCode: "NOT_FOUND_PHON",
         message: "شماره نامعتبر است ",
@@ -136,7 +203,19 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 
   const code = generateCode();
   const hashedCode = hashCode(code);
-  const codeUsed = await OtpModel.updateOtp(phone, "login");
+  // const codeUsed = await OtpModel.updateOtp(phone, "login");
+  const codeUsed = await Otp.update(
+    {
+      used_at: Sequelize.fn("now"), // یا new Date()
+    },
+    {
+      where: {
+        phone: phone,
+        used_at: null,
+        type: "login",
+      },
+    },
+  );
 
   //await sendOtp(phone, code, type);
   if (type == "login") {
@@ -145,7 +224,13 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
     console.log("کد تایید شما :", `شماره شما: ${phone}`, code);
   }
   const expire = new Date(Date.now() + 3 * 60 * 1000);
-  await OtpModel.addOtp(phone, hashedCode, type, expire);
+  //await OtpModel.addOtp(phone, hashedCode, type, expire);
+  await Otp.create({
+    phone: phone,
+    code: hashedCode,
+    type: type,
+    expires_at: expire,
+  });
 
   res.status(200).json({
     message: "کد به شماره شما ارسال شد ",
@@ -154,9 +239,15 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 
 export const otpCheckForgot = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
-  if (type == "login" && "forgot") {
-    const user = await UserModel.getUserPhone(phone);
-    if (!user[0]) {
+  if (type !== "register") {
+    //const user = await UserModel.getUserPhone(phone);
+    console.log("Login or forgot" , phone , code , type)
+    const user = await User.findOne({
+      where: {
+        phone: phone,
+      },
+    });
+    if (!user) {
       throw new AppError({
         errorCode: "NOT_FOUND_PHON",
         message: "شماره نامعتبر است ",
@@ -165,8 +256,18 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     }
   }
 
-  const otp = await OtpModel.getOtp(phone, type);
-  if (!otp[0]) {
+  //const otp = await OtpModel.getOtp(phone, type);
+  const otp = await Otp.findOne({
+    where: {
+      phone: phone,
+      expires_at: {
+        [Op.gt]: Sequelize.fn("now"), // expires_at > now()
+      },
+      used_at: null,
+      type: type,
+    },
+  });
+  if (!otp) {
     throw new AppError({
       errorCode: "NOT_FOUND_CODE_OTP",
       message: "کد نا معتبر است",
@@ -174,7 +275,7 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     });
   }
   const codeHash = hashCode(code);
-  if (otp[0].code !== codeHash) {
+  if (otp.code !== codeHash) {
     throw new AppError({
       errorCode: "ERROR_CODE_OTP",
       message: "کد نامعتبر است ",
@@ -182,7 +283,19 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     });
   }
 
-  const codeUsed = await OtpModel.updateOtp(phone, type);
+  // const codeUsed = await OtpModel.updateOtp(phone, type);
+  const codeUsed = await Otp.update(
+    {
+      used_at: Sequelize.fn("now"), // یا new Date()
+    },
+    {
+      where: {
+        phone: phone,
+        used_at: null,
+        type: type,
+      },
+    },
+  );
   res.status(200).json({
     message: "ورود با موفقیت انجام شد",
   });
@@ -190,7 +303,12 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
 
 export const updatePassword = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
-  const exists = await UserModel.getUserPhone(phone.trim());
+  // const exists = await UserModel.getUserPhone(phone.trim());
+  const exists = await User.findOne({
+    where: {
+      phone: phone.trim(),
+    },
+  });
   if (!exists.length) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHON",
@@ -200,7 +318,8 @@ export const updatePassword = trycatchHandler(async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 12);
-  await UserModel.updatePassword(exists[0].id, hashPassword);
+  // await UserModel.updatePassword(exists.id, hashPassword);
+  await User.update({ password: hashPassword }, { where: { id: exists.id } });
 
   res.status(201).json({
     success: true,
@@ -208,12 +327,15 @@ export const updatePassword = trycatchHandler(async (req, res) => {
   });
 });
 
-export const refresh = async (req, res) => {
+/* export const refresh = async (req, res) => {
   const token = req.cookies.refreshToken;
   if (!token) throw new AppError("NO_REFRESH", "Unauthorized", 401);
 
   const hashToken = hashCode(token);
-  const payload = jwt.verify(token, config.get('jwt.accessTokenSecret') /*process.env.ACCESS_TOKEN_SECRET*/);
+  const payload = jwt.verify(
+    token,
+    config.get("jwt.accessTokenSecret") //process.env.ACCESS_TOKEN_SECRET,
+  );
 
   const user = await UserModel.getUserId(payload.sub);
   if (user[0].token !== payload.token) {
@@ -233,7 +355,7 @@ export const refresh = async (req, res) => {
   }
   const newAccessToken = RefreshToken(user[0]);
   res.json({ accessToken: newAccessToken });
-};
+}; 
 export async function logout(req, res, next) {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -242,7 +364,10 @@ export async function logout(req, res, next) {
       return res.sendStatus(204);
     }
     const tokenHash = hashCode(refreshToken);
-    const payload = jwt.verify(token, config.get('jwt.refreshTokenSecret') /*process.env.REFRESH_TOKEN_SECRET*/);
+    const payload = jwt.verify(
+      token,
+      config.get("jwt.refreshTokenSecret") //process.env.REFRESH_TOKEN_SECRET,
+    );
     const token = await TokenModel.getTokenInUserId(payload.sub);
     if (!token[0]) return res.sendStatus(204);
 
@@ -259,4 +384,4 @@ export async function logout(req, res, next) {
   } catch (err) {
     next(err);
   }
-}
+}*/

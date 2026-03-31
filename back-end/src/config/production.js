@@ -17,17 +17,11 @@ const config = {
     database: process.env.DB_PROD_DATABASE || "API_LOGIN",
     dialect: process.env.DB_PROD_DIALECT || "mysql",
     pool: {
-      max: parseInt(process.env.DB_POOL_MAX_PRO || "10", 10), 
+      max: parseInt(process.env.DB_POOL_MAX_PRO || "10", 10), // Conversion to base ten
       min: parseInt(process.env.DB_POOL_MIN_PRO || "2", 10),
       acquire: parseInt(process.env.DB_POOL_ACQUIRE_PRO || "50000", 10),
       idle: parseInt(process.env.DB_POOL_IDLE_PRO || "20000", 10),
     },
-  },
-  // api sms otp
-  apiKeys: {
-    externalService: process.env.API_KEY, 
-    loginTemplateId: process.env.LOGIN_TEMPLATE_ID,
-    verifyTemplateId: process.env.VERIFY_TEMPLATE_ID,
   },
   jwt: {
     accessTokenSecret: process.env.ACCESS_TOKEN_SECRET, // access token secet key

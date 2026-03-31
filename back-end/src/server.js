@@ -1,10 +1,11 @@
 import app from "./app.js";
 //import dotenv from "dotenv";
 //dotenv.config();
-import config from "config";
+import config from "./config/index.js";
 
-const port = config.get('app.port');
-console.log(port , config.get('database.pool.idle'))
+console.log( config.app, config.database.pool)
+const port = config.app.port;
+
 // const port = process.env.PORT || 3000;
 
 app.listen(port, () => {

@@ -2,17 +2,17 @@ import axios from "axios";
 import qs from "qs";
 //import dotenv from "dotenv";
 //dotenv.config({ path: "../.env" });
-import config from "config";
+import config from "../config/index.js";
 
-const apikey =  config.get('apiKeys.externalService')/*process.env.API_KEY*/;
+const apikey =  config.apiKeys.externalService/*process.env.API_KEY*/;
 const url = "http://api.ghasedaksms.com/v2/send/verify";
 
 // function send code OTP with difrent templet 
 export const sendOtp = async (phone, code, type) => {
   const templateId =
     type === "login"
-      ? config.get('apiKeys.loginTemplateId') //process.env.LOGIN_TEMPLATE_ID
-      : config.get('apiKeys.verifyTemplateId')//process.env.VERIFY_TEMPLATE_ID;
+      ? config.apiKeys.loginTemplateId //process.env.LOGIN_TEMPLATE_ID
+      : config.apiKeys.verifyTemplateId//process.env.VERIFY_TEMPLATE_ID;
   try {
     const response = await axios.post(
       url,

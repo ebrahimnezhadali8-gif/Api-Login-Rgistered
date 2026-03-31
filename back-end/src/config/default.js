@@ -24,8 +24,7 @@ const config = {
 
   // Tokens JWT
   jwt: {
-    accessTokenSecret:
-      process.env.ACCESS_TOKEN_SECRET || "SERVICE_API_LOGIN",
+    accessTokenSecret: process.env.ACCESS_TOKEN_SECRET || "SERVICE_API_LOGIN",
     refreshTokenSecret:
       process.env.REFRESH_TOKEN_SECRET || "default_refresh_secret",
     accessTokenExpires: process.env.ACCESS_TOKEN_EXPIRES || "15m",
@@ -39,8 +38,9 @@ const config = {
     password: process.env.DB_PASSWORD || null,
     database: process.env.DB_DATABASE || "API_LOGIN",
     dialect: process.env.DB_DIALECT || "mysql",
+    loggin: false,
     pool: {
-      max: parseInt(process.env.DB_POOL_MAX || "5", 10), 
+      max: parseInt(process.env.DB_POOL_MAX || "5", 10), // Conversion to base ten
       min: parseInt(process.env.DB_POOL_MIN || "0", 10),
       acquire: parseInt(process.env.DB_POOL_ACQUIRE || "30000", 10),
       idle: parseInt(process.env.DB_POOL_IDLE || "10000", 10),

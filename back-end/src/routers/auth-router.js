@@ -8,14 +8,14 @@ import {
 } from "../validators/auth.schema.js";
 import {
   login,
-  logout,
+//  logout,
   otpCheckForgot,
   otpCheckLogin,
-  refresh,
+//  refresh,
   register,
   sendCodeOtp,
   updatePassword,
-} from "../controllers/auth-controller.js";
+} from "../controllers/auth.controller.js";
 import { validate } from "../middlware/validate.js";
 import {
   changePasswordLimiter,
@@ -39,7 +39,7 @@ router.post(
   validate(changePasswordSchema),
   updatePassword
 );
-router.post("/refresh", TokenLimiter , refresh);
-router.post("/logout", logout);
+// router.post("/refresh", TokenLimiter , refresh);
+// router.post("/logout", logout);
 
 export default router;

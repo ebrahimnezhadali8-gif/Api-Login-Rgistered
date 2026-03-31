@@ -16,13 +16,6 @@ const config = {
     database: process.env.DB_DATABASE_TEST || "API_LOGIN",
     dialect: process.env.DB_DIALECT_TEST || "mysql",
   },
- 
-  jwt: {
-    accessTokenSecret: "test_access_secret",
-    refreshTokenSecret: "test_refresh_secret",
-    accessTokenExpires: "1m", 
-    refreshTokenExpires: "5m",
-  },
 };
 
 export default config;
