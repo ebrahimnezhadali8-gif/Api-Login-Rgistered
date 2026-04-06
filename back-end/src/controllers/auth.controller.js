@@ -3,7 +3,7 @@ import AppError from "../utilites/app_error.js";
 import { trycatchHandler } from "../utilites/trycatch_handler.js";
 import { generateCode, hashCode } from "../services/generate-code.js";
 // import jwt from "jsonwebtoken";
-// import { sendOtp } from "../services/send-templet.js";
+import { sendOtp } from "../services/send-templet.js";
 import { AccessToken, RefreshToken } from "../utilites/token.js";
 import db from "../models/index.js";
 const { User, Otp } = db;
@@ -85,7 +85,7 @@ export const login = trycatchHandler(async (req, res) => {
     },
   );
 
-  //await sendOtp(phone, code, "login");
+  // await sendOtp(phone, code, "login");
   console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
   // await OtpModel.addOtp(phone, hashedCode, "login", expire);
@@ -108,6 +108,7 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     where: {
       phone: phone,
     },
+    attributes: ["id", "name", "phone", "role"],
   });
   if (!user) {
     throw new AppError({
@@ -169,9 +170,10 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
   // const time_expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   // await TokenModel.insertToken(user.id, hashToken, time_expires);
+  console.log("Login ... ", accessToken, user.role, phone, user.name, user.id);
   res.status(200).json({
     accessToken,
-    role: user.role,
+    user: user,
   });
 });
 
@@ -217,7 +219,7 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
     },
   );
 
-  //await sendOtp(phone, code, type);
+  // await sendOtp(phone, code, type);
   if (type == "login") {
     console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   } else {
@@ -241,7 +243,7 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
   if (type !== "register") {
     //const user = await UserModel.getUserPhone(phone);
-    console.log("Login or forgot" , phone , code , type)
+    console.log("Login or forgot", phone, code, type);
     const user = await User.findOne({
       where: {
         phone: phone,

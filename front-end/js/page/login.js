@@ -155,10 +155,12 @@ async function chechOtp() {
 
   try {
     const data = await apiPost("/api/auth/codeOtp", payload);
-    setAuth(data.accessToken, data.role);
+    let user = data.user
+    setAuth(data.accessToken, user.role);
+    sessionStorage.setItem("userData", JSON.stringify(user));
     setTimeout(() => {
-      window.location.href = `./${data.role}/dashboard.html`;
-    }, 1000);
+      window.location.href = `./${user.role}/dashboard.html`;
+    }, 5000);
   } catch (error) {
     showErrorMsg(error.message, "login-tow");
   } finally {
