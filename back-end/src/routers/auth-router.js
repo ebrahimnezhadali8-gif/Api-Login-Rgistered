@@ -8,7 +8,7 @@ import {
 } from "../validators/auth.schema.js";
 import {
   login,
-//  logout,
+  logout,
   otpCheckForgot,
   otpCheckLogin,
   refresh,
@@ -40,6 +40,6 @@ router.post(
   updatePassword
 );
 router.post("/refresh", TokenLimiter , refresh);
-// router.post("/logout", logout);
+router.post("/logout", logout);
 
 export default router;

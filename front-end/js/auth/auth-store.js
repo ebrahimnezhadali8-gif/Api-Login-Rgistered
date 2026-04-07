@@ -14,4 +14,5 @@ export function getRole() {
 export function clearAuth() {
   sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("userRole");
+  sessionStorage.removeItem("userData");
 }

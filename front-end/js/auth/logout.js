@@ -1,5 +1,5 @@
 import { clearAuth } from "./auth-store.js";
-const BASE = "http://localhost:5500";
+const BASE = "http://127.0.0.1:3000";
 export async function logout() {
   try {
     await fetch(BASE + "/api/auth/logout", {

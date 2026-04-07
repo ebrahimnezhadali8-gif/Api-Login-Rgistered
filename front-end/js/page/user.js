@@ -1,4 +1,5 @@
 import { apiGet } from "../api/api.js";
+import { logout } from "../auth/logout.js";
 //import { clearAuth } from "../auth/auth-store.js";
 //import { logout } from "../auth/logout.js";
 let phoneUser = null;
@@ -10,7 +11,7 @@ const phone = document.getElementById("phone");
 const role = document.getElementById("role-user");
 // const phoneUpdate = document.getElementById("phone-update");
 // const roleUpdate = document.getElementById("role-update");
-// const buttonLogout = document.querySelector("#button-login");
+const buttonLogout = document.querySelector("#button-login");
 const userDataStr = sessionStorage.getItem("userData");
 const userData = userDataStr ? JSON.parse(userDataStr) : {};
 phoneUser = userData.phone || "";
@@ -47,7 +48,7 @@ document.getElementById("button-data-user").addEventListener("click" , async()=>
   }
 })
 
-/*buttonLogout.addEventListener("click", () => {
-  clearAuth();
+buttonLogout.addEventListener("click", () => {
+  logout();
   window.location.href = "../index.html";
-});*/
+});

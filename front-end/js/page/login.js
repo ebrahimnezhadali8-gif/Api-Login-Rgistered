@@ -160,7 +160,7 @@ async function chechOtp() {
     sessionStorage.setItem("userData", JSON.stringify(user));
     setTimeout(() => {
       window.location.href = `./${user.role}/dashboard.html`;
-    }, 5000);
+    }, 1000);
   } catch (error) {
     showErrorMsg(error.message, "login-tow");
   } finally {

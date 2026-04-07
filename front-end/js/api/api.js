@@ -1,4 +1,5 @@
-import { getAccessToken, setAuth, clearAuth } from "../auth/auth-store.js";
+import { getAccessToken, setAuth } from "../auth/auth-store.js";
+import { logout } from "../auth/logout.js";
 
 const BASE = "http://127.0.0.1:3000";
 let isRefreshing = false;
@@ -25,7 +26,7 @@ async function request(url, options = {}, retry = true) {
 
     if (data.errorCode === "TOKEN_EXPIRED") {
       await handleRefresh();
-      return request(url, options, false); 
+      return request(url, options, false);
     }
 
     logout();
@@ -48,7 +49,7 @@ async function request(url, options = {}, retry = true) {
 
 async function handleRefresh() {
   if (isRefreshing) {
-    return refreshPromise; 
+    return refreshPromise;
   }
 
   isRefreshing = true;

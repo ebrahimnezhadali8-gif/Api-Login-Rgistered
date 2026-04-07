@@ -376,32 +376,30 @@ export const refresh = trycatchHandler(async (req, res) => {
   const newAccessToken = AccessToken(user);
   res.json({ accessToken: newAccessToken });
 });
-/*export async function logout(req, res, next) {
+export async function logout(req, res, next) {
   try {
     const refreshToken = req.cookies.refreshToken;
-
     if (!refreshToken) {
       return res.sendStatus(204);
     }
     const tokenHash = hashCode(refreshToken);
-    const payload = jwt.verify(
-      token,
-      config.get("jwt.refreshTokenSecret") //process.env.REFRESH_TOKEN_SECRET,
-    );
-    const token = await TokenModel.getTokenInUserId(payload.sub);
-    if (!token[0]) return res.sendStatus(204);
+    const payload = jwt.verify(refreshToken, config.jwt.refreshTokenSecret);
+    console.log(payload);
+    await Token.destroy({
+      where: {
+        id: payload.tid,
+      },
+    });
 
-    await TokenModel.deleteToken(token[0].id);
-
-    res.cookie("refreshToken", refreshToken, {
+    res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: false, // برای localhost
-      sameSite: "lax", // برای dev
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+      secure: false, // در لوکال
+      path: "/",
     });
 
     return res.sendStatus(204);
   } catch (err) {
     next(err);
   }
-}*/
+}
