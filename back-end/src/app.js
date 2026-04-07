@@ -8,7 +8,7 @@ import { httpLogger } from "./middlware/http-log.js";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import userRouter from "./routers/user-router.js";
-import { checkOrigin } from "./middlware/origin.js";
+import xssClean from "xss-clean";
 
 const allowedOrigins = ["http://127.0.0.1:5500", "http://localhost:5500"];
 app.use(
@@ -23,27 +23,21 @@ app.use(
     credentials: true,
   }),
 );
-app.use(checkOrigin);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(xssClean());
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "trusted.com"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: [],
+        upgradeInsecureRequests: ["*"],
       },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
-/* app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET , PUT , POST , DELETE , PATCH");
-  res.setHeader("Access-Control-Allow-Headers", "Content-type , Authorization");
-  next();
-});*/
 app.use(cookieParser());
 app.use(reqContext);
 app.use(httpLogger);
