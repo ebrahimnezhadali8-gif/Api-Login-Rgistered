@@ -2,20 +2,18 @@ import bcrypt from "bcrypt";
 import AppError from "../utilites/app_error.js";
 import { trycatchHandler } from "../utilites/trycatch_handler.js";
 import { generateCode, hashCode } from "../services/generate-code.js";
-// import jwt from "jsonwebtoken";
 import { sendOtp } from "../services/send-templet.js";
 import { AccessToken, RefreshToken } from "../utilites/token.js";
 import db from "../models/index.js";
 const { User, Otp, Token } = db;
 import { v4 as uuidv4 } from "uuid";
-import { Sequelize, Op, where } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 import config from "../config/index.js";
 import jwt from "jsonwebtoken";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
 
-  //const exists = await UserModel.getUserPhone(phone);
   const exists = await User.findOne({
     where: {
       phone: phone,
@@ -30,7 +28,6 @@ export const register = trycatchHandler(async (req, res) => {
   }
   const hashPassword = await bcrypt.hash(password, 12);
 
-  // await UserModel.addUser(name, phone, hashPassword);
   const id = uuidv4();
   await User.create({
     id: id,
@@ -47,7 +44,7 @@ export const register = trycatchHandler(async (req, res) => {
 
 export const login = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
-  // const user = await UserModel.getUserPhone(phone);
+
   const user = await User.findOne({
     where: {
       phone: phone,
@@ -73,7 +70,6 @@ export const login = trycatchHandler(async (req, res) => {
   const code = generateCode();
   const hashedCode = hashCode(code);
 
-  //const codeUsed = await OtpModel.updateOtp(phone, "login");
   const codeUsed = await Otp.update(
     {
       used_at: Sequelize.fn("now"), // یا new Date()
@@ -87,10 +83,17 @@ export const login = trycatchHandler(async (req, res) => {
     },
   );
 
-  // await sendOtp(phone, code, "login");
-  console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
+  const sendOtpCode = await sendOtp(phone, code, "login");
+  console.log(sendOtpCode);
+  if (!sendOtpCode) {
+    throw new AppError({
+      errorCode: "NOT_SEND_OTP_CODE",
+      message: "خطا در اتصال با سرور",
+      statusCode: 500,
+    });
+  }
+  // console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
   const expire = new Date(Date.now() + 3 * 60 * 1000);
-  // await OtpModel.addOtp(phone, hashedCode, "login", expire);
   await Otp.create({
     phone: phone,
     code: hashedCode,
@@ -105,7 +108,6 @@ export const login = trycatchHandler(async (req, res) => {
 
 export const otpCheckLogin = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
-  // const user = await UserModel.getUserPhone(phone);
   const user = await User.findOne({
     where: {
       phone: phone,
@@ -119,7 +121,6 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
       statusCode: 401,
     });
   }
-  // const otp = await OtpModel.getOtp(phone, type);
   const otp = await Otp.findOne({
     where: {
       phone: phone,
@@ -146,7 +147,6 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     });
   }
 
-  // const codeUsed = await OtpModel.updateOtp(phone, type);
   const codeUsed = await Otp.update(
     {
       used_at: Sequelize.fn("now"), // یا new Date()
@@ -174,15 +174,12 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     expires_at: new Date(Date.now() + expire),
   });
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, // 🔐 مهم
-    secure: false, // چون http هست
+    httpOnly: true,
+    secure: false,
     sameSite: "lax",
     maxAge: expire,
   });
-  // console.log(" cookie set");
-  // const time_expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  // await TokenModel.insertToken(user.id, hashToken, time_expires);
   res.status(200).json({
     accessToken,
     user: user,
@@ -191,7 +188,6 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
 
 export const sendCodeOtp = trycatchHandler(async (req, res) => {
   const { phone, type } = req.body;
-  //const user = await UserModel.getUserPhone(phone);
   const user = await User.findOne({
     where: {
       phone: phone,
@@ -217,7 +213,6 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 
   const code = generateCode();
   const hashedCode = hashCode(code);
-  // const codeUsed = await OtpModel.updateOtp(phone, "login");
   const codeUsed = await Otp.update(
     {
       used_at: Sequelize.fn("now"), // یا new Date()
@@ -226,25 +221,27 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
       where: {
         phone: phone,
         used_at: null,
-        type: "login",
+        type: type,
       },
     },
   );
 
-  // await sendOtp(phone, code, type);
-  if (type == "login") {
-    console.log("کد ورود شما :", `شماره شما: ${phone}`, code);
-  } else {
-    console.log("کد تایید شما :", `شماره شما: ${phone}`, code);
-  }
   const expire = new Date(Date.now() + 3 * 60 * 1000);
-  //await OtpModel.addOtp(phone, hashedCode, type, expire);
   await Otp.create({
     phone: phone,
     code: hashedCode,
     type: type,
     expires_at: expire,
   });
+
+  const sendOtpCode = await sendOtp(phone, code, type);
+  if (!sendOtpCode) {
+    throw new AppError({
+      errorCode: "NOT_SEND_OTP_CODE",
+      message: "خطا در اتصال با سرور",
+      statusCode: 500,
+    });
+  }
 
   res.status(200).json({
     message: "کد به شماره شما ارسال شد ",
@@ -254,8 +251,7 @@ export const sendCodeOtp = trycatchHandler(async (req, res) => {
 export const otpCheckForgot = trycatchHandler(async (req, res) => {
   const { phone, code, type } = req.body;
   if (type !== "register") {
-    //const user = await UserModel.getUserPhone(phone);
-    console.log("Login or forgot", phone, code, type);
+    // console.log("Login or forgot", phone, code, type);
     const user = await User.findOne({
       where: {
         phone: phone,
@@ -270,7 +266,6 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     }
   }
 
-  //const otp = await OtpModel.getOtp(phone, type);
   const otp = await Otp.findOne({
     where: {
       phone: phone,
@@ -297,7 +292,6 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
     });
   }
 
-  // const codeUsed = await OtpModel.updateOtp(phone, type);
   const codeUsed = await Otp.update(
     {
       used_at: Sequelize.fn("now"), // یا new Date()
@@ -317,13 +311,13 @@ export const otpCheckForgot = trycatchHandler(async (req, res) => {
 
 export const updatePassword = trycatchHandler(async (req, res) => {
   const { phone, password } = req.body;
-  // const exists = await UserModel.getUserPhone(phone.trim());
   const exists = await User.findOne({
     where: {
-      phone: phone.trim(),
+      phone: phone,
     },
   });
-  if (!exists.length) {
+  console.log(exists)
+  if (!exists) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHON",
       message: "شماره نامعتبر است ",
@@ -394,7 +388,7 @@ export async function logout(req, res, next) {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       sameSite: "lax",
-      secure: false, // در لوکال
+      secure: false,
       path: "/",
     });
 

@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
       code: { type: DataTypes.STRING(255), allowNull: false },
       expires_at: { type: DataTypes.DATE, allowNull: false },
       type: {
-        type: DataTypes.ENUM("login", "register", "fogot"),
+        type: DataTypes.ENUM("login", "register", "forgot"),
         allowNull: false,
       },
       used_at: { type: DataTypes.DATE, allowNull: true },

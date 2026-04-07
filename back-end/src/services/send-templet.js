@@ -1,18 +1,16 @@
 import axios from "axios";
 import qs from "qs";
-//import dotenv from "dotenv";
-//dotenv.config({ path: "../.env" });
 import config from "../config/index.js";
 
-const apikey =  config.apiKeys.externalService/*process.env.API_KEY*/;
+const apikey = config.apiKeys.externalService;
 const url = "http://api.ghasedaksms.com/v2/send/verify";
 
-// function send code OTP with difrent templet 
+// function send code OTP with difrent templet
 export const sendOtp = async (phone, code, type) => {
   const templateId =
     type === "login"
-      ? config.apiKeys.loginTemplateId //process.env.LOGIN_TEMPLATE_ID
-      : config.apiKeys.verifyTemplateId//process.env.VERIFY_TEMPLATE_ID;
+      ? config.apiKeys.loginTemplateId
+      : config.apiKeys.verifyTemplateId;
   try {
     const response = await axios.post(
       url,
@@ -27,12 +25,12 @@ export const sendOtp = async (phone, code, type) => {
           apikey: apikey,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
     console.log("پیامک ارسال شد:", response.data);
+    return true;
   } catch (error) {
     console.log("خطا در ارسال پیامک:", error.response?.data || error.message);
+    return false;
   }
 };
-
-

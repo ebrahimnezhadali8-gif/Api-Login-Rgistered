@@ -3,6 +3,7 @@ import DailyRotateFile from "winston-daily-rotate-file";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import config from "../config/index.js"
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -71,7 +72,7 @@ if (process.env.NODE_ENV !== "production") {
 
 // Logger
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || "info",
+  level: config.logging.level || "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),

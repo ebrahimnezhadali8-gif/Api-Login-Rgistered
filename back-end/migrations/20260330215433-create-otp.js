@@ -22,7 +22,7 @@ export default {
         allowNull: false,
       },
       type: {
-        type: Sequelize.ENUM("login", "register", "fogot"),
+        type: Sequelize.ENUM("login", "register", "forgot"),
         allowNull: false,
       },
       used_at: {
