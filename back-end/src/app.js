@@ -23,13 +23,16 @@ app.use(
     credentials: true,
   }),
 );
-app.use(checkOrigin)
+app.use(checkOrigin);
 app.use(express.json());
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "trusted.com"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
       },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
