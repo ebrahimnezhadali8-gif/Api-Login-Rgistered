@@ -11,7 +11,7 @@ import {
 //  logout,
   otpCheckForgot,
   otpCheckLogin,
-//  refresh,
+  refresh,
   register,
   sendCodeOtp,
   updatePassword,
@@ -39,7 +39,7 @@ router.post(
   validate(changePasswordSchema),
   updatePassword
 );
-// router.post("/refresh", TokenLimiter , refresh);
+router.post("/refresh", TokenLimiter , refresh);
 // router.post("/logout", logout);
 
 export default router;

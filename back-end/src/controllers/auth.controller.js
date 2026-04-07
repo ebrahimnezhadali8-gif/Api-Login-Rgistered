@@ -6,9 +6,11 @@ import { generateCode, hashCode } from "../services/generate-code.js";
 import { sendOtp } from "../services/send-templet.js";
 import { AccessToken, RefreshToken } from "../utilites/token.js";
 import db from "../models/index.js";
-const { User, Otp } = db;
+const { User, Otp, Token } = db;
 import { v4 as uuidv4 } from "uuid";
-import { Sequelize, Op } from "sequelize";
+import { Sequelize, Op, where } from "sequelize";
+import config from "../config/index.js";
+import jwt from "jsonwebtoken";
 
 export const register = trycatchHandler(async (req, res) => {
   const { name, phone, password } = req.body;
@@ -158,19 +160,29 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     },
   );
   const accessToken = AccessToken(user);
-  // const refreshToken = RefreshToken(user[0]);
-  // const hashToken = hashCode(refreshToken);
-  /* res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
+  const tokenId = uuidv4();
+  const refreshToken = RefreshToken(user, tokenId);
+  const hashToken = hashCode(refreshToken);
+  const expire = 7 * 24 * 60 * 60 * 1000;
+  await Token.destroy({
+    where: { userId: user.id },
+  });
+  await Token.create({
+    id: tokenId,
+    userId: user.id,
+    token: hashToken,
+    expires_at: new Date(Date.now() + expire),
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true, // 🔐 مهم
     secure: false, // چون http هست
-    sameSite: "none", // "strict" روی POST هم فرستاده می‌شه
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  }); */
+    sameSite: "lax",
+    maxAge: expire,
+  });
   // console.log(" cookie set");
   // const time_expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   // await TokenModel.insertToken(user.id, hashToken, time_expires);
-  console.log("Login ... ", accessToken, user.role, phone, user.name, user.id);
   res.status(200).json({
     accessToken,
     user: user,
@@ -329,36 +341,42 @@ export const updatePassword = trycatchHandler(async (req, res) => {
   });
 });
 
-/* export const refresh = async (req, res) => {
+export const refresh = trycatchHandler(async (req, res) => {
   const token = req.cookies.refreshToken;
-  if (!token) throw new AppError("NO_REFRESH", "Unauthorized", 401);
+  console.log(`token : ${token}`);
+  if (!token) throw new AppError("NO_REFRESH_TOKEN", "Unauthorized", 401);
 
   const hashToken = hashCode(token);
-  const payload = jwt.verify(
-    token,
-    config.get("jwt.accessTokenSecret") //process.env.ACCESS_TOKEN_SECRET,
-  );
+  const payload = jwt.verify(token, config.jwt.refreshTokenSecret);
 
-  const user = await UserModel.getUserId(payload.sub);
-  if (user[0].token !== payload.token) {
+  const user = await User.findOne({
+    where: {
+      id: payload.sub,
+    },
+  });
+  if (!user) {
     throw new AppError({
       errorCode: "REVOKED",
       message: "احراز هویت تایید نشد",
       statusCode: 401,
     });
   }
-  const refresh_token = await TokenModel.getTokenInUserId(payload.sub);
-  if (hashToken !== refresh_token[0].token) {
+  const refresh_token = await Token.findOne({
+    where: {
+      userId: payload.sub,
+    },
+  });
+  if (hashToken !== refresh_token.token) {
     throw new AppError({
       errorCode: "REVOKED",
       message: "احراز هویت تایید نشد",
       statusCode: 401,
     });
   }
-  const newAccessToken = RefreshToken(user[0]);
+  const newAccessToken = AccessToken(user);
   res.json({ accessToken: newAccessToken });
-}; 
-export async function logout(req, res, next) {
+});
+/*export async function logout(req, res, next) {
   try {
     const refreshToken = req.cookies.refreshToken;
 

@@ -9,11 +9,18 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import userRouter from "./routers/user-router.js";
 
+const allowedOrigins = ["http://127.0.0.1:5500", "http://localhost:5500"];
 app.use(
   cors({
-    origin: "http://127.0.0.1:5500",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(
@@ -24,8 +31,14 @@ app.use(
       },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
+  }),
 );
+/* app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET , PUT , POST , DELETE , PATCH");
+  res.setHeader("Access-Control-Allow-Headers", "Content-type , Authorization");
+  next();
+});*/
 app.use(cookieParser());
 app.use(reqContext);
 app.use(httpLogger);

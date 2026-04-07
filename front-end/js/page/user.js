@@ -1,4 +1,4 @@
-//import { apiGet } from "../api/api.js";
+import { apiGet } from "../api/api.js";
 //import { clearAuth } from "../auth/auth-store.js";
 //import { logout } from "../auth/logout.js";
 let phoneUser = null;
@@ -26,21 +26,7 @@ function maskPhone(phone) {
   loadProfile();
 });*/
 
-/*async function loadProfile() {
-  uneye.classList.remove("active");
-  eye.classList.add("active");
-  const name = document.getElementById("name");
-  try {
-    const data = await apiGet("/api/user/me");
-    name.innerHTML = data.name;
-    role.innerHTML = data.role;
-    phoneUser = data.phone;
-    roleUser = data.role === "user" ? "کاربر" : "ادمین";
-    role.innerHTML = roleUser;
-    const phoneMask = maskPhone(phoneUser);
-    phone.innerHTML = phoneMask;
-  } catch (error) {}
-}*/
+
 eye.addEventListener("click", () => {
   eye.classList.remove("active");
   uneye.classList.add("active");
@@ -52,6 +38,14 @@ uneye.addEventListener("click", () => {
   eye.classList.add("active");
   phone.innerHTML = maskPhone(phoneUser);
 });
+
+document.getElementById("button-data-user").addEventListener("click" , async()=>{
+  try {
+    const data = await apiGet("/api/user/me");
+    console.log(data)
+  } catch (error) {
+  }
+})
 
 /*buttonLogout.addEventListener("click", () => {
   clearAuth();

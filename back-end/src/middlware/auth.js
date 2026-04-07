@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-
 import db from "../models/index.js";
 import AppError from "../utilites/app_error.js";
+import config from "../config/index.js";
 const { User } = db;
 
 export const auth = async (req, res, next) => {
@@ -17,7 +17,7 @@ export const auth = async (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const payload = jwt.verify(token, config.jwt.accessTokenSecret);
     const user = await User.findOne({
       where: {
         id: payload.sub,
@@ -34,7 +34,6 @@ export const auth = async (req, res, next) => {
       );
     }
     req.user = {
-      //id: payload.sub,
       id: user.id,
       role: user.role,
     };

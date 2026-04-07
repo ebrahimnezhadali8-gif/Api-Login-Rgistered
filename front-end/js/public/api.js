@@ -1,8 +1,9 @@
-const BASE = "http://localhost:5500";
+const BASE = "http://127.0.0.1:3000";
 
 export async function apiPost(url, body) {
   const res = await fetch(BASE + url, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },

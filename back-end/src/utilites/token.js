@@ -1,6 +1,4 @@
 import jwt from "jsonwebtoken";
-//import dotenv from "dotenv";
-//dotenv.config();
 import config from "../config/index.js";
 
 export const AccessToken = (user) => {
@@ -10,22 +8,19 @@ export const AccessToken = (user) => {
       role: user.role,
     },
     config.jwt.accessTokenSecret,
-    //process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: config.jwt.accessTokenExpires }, //process.env.ACCESS_TOKEN_EXPIRES}
+    { expiresIn: config.jwt.accessTokenExpires },
   );
 };
 
-export const RefreshToken = (user) => {
+export const RefreshToken = (user , tokenId) => {
   return jwt.sign(
     {
       sub: user.id,
-      tokenVersion: user.tokenVersion, //tokenVersion in logout or token leak
+      tid: tokenId
     },
     config.jwt.refreshTokenSecret,
-    //process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn:
-        config.jwt.refreshTokenExpires /*process.env.REFRESH_TOKEN_EXPIRES*/,
+      expiresIn: config.jwt.refreshTokenExpires,
     },
   );
 };

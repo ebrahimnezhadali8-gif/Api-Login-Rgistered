@@ -2,6 +2,7 @@ import Sequelize from "sequelize";
 import config from "../config/index.js";
 import UserModel from "./users.js";
 import OtpModel from "./otp.js";
+import TokenModel from "./token.js"
 
 const sequelize = new Sequelize(
   config.database.database,
@@ -17,5 +18,6 @@ db.Sequelize = Sequelize;
 
 db.User = UserModel(sequelize, Sequelize);
 db.Otp = OtpModel(sequelize, Sequelize);
+db.Token = TokenModel(sequelize, Sequelize);
 
 export default db;
