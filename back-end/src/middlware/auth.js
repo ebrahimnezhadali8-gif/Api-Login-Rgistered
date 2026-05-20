@@ -5,8 +5,8 @@ import config from "../config/index.js";
 const { User } = db;
 
 export const auth = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader)
+  const token = req.cookies.accessToken; // Get token from cookies
+  if (!token) {
     return next(
       new AppError({
         errorCode: "NO_TOKEN",
@@ -14,7 +14,7 @@ export const auth = async (req, res, next) => {
         statusCode: 401,
       }),
     );
-  const token = authHeader.split(" ")[1];
+  }
 
   try {
     const payload = jwt.verify(token, config.jwt.accessTokenSecret);
@@ -28,7 +28,7 @@ export const auth = async (req, res, next) => {
       return next(
         new AppError({
           errorCode: "NOT_FOUND_TOKEN_USER",
-          message: "توکن کاربر یافت نشد",
+          message: " کاربر  نامعتبر است",
           statusCode: 403,
         }),
       );
@@ -42,8 +42,8 @@ export const auth = async (req, res, next) => {
     return next(
       new AppError({
         errorCode: "TOKEN_EXPIRED",
-        message: "احراز هویت تایید نشد",
-        statusCode: 403,
+        message: "توکن منقضی شده است",
+        statusCode: 401,
       }),
     );
   }

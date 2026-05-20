@@ -114,6 +114,7 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     },
     attributes: ["id", "name", "phone", "role"],
   });
+  // Check in existence of user
   if (!user) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHONE",
@@ -138,6 +139,8 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
       statusCode: 401,
     });
   }
+  // Burn OTP after use
+  await otp.update({ used_at: Sequelize.fn("now") });
   const codeHash = hashCode(code);
   if (otp.code !== codeHash) {
     throw new AppError({
@@ -147,41 +150,26 @@ export const otpCheckLogin = trycatchHandler(async (req, res) => {
     });
   }
 
-  const codeUsed = await Otp.update(
-    {
-      used_at: Sequelize.fn("now"), // یا new Date()
-    },
-    {
-      where: {
-        phone: phone,
-        used_at: null,
-        type: type,
-      },
-    },
-  );
-  const accessToken = AccessToken(user);
   const tokenId = uuidv4();
-  const refreshToken = RefreshToken(user, tokenId);
+  const familyId = uuidv4();
+  const accessToken = AccessToken(user);
+  const refreshToken = RefreshToken(user, tokenId, familyId);
   const hashToken = hashCode(refreshToken);
   const expire = 7 * 24 * 60 * 60 * 1000;
-  await Token.destroy({
-    where: { userId: user.id },
-  });
+
+  // Store the hashed refresh token in the database
   await Token.create({
     id: tokenId,
     userId: user.id,
     token: hashToken,
     expires_at: new Date(Date.now() + expire),
   });
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: expire,
-  });
+
+  res.cookie("accessToken", accessToken, getCookieOptions(15 * 60 * 1000)); // 15 minutes
+  res.cookie("refreshToken", refreshToken, getCookieOptions(expireDays));
 
   res.status(200).json({
-    accessToken,
+    success: true,
     user: user,
   });
 });
@@ -316,7 +304,7 @@ export const updatePassword = trycatchHandler(async (req, res) => {
       phone: phone,
     },
   });
-  console.log(exists)
+  console.log(exists);
   if (!exists) {
     throw new AppError({
       errorCode: "NOT_FOUND_PHON",
@@ -335,65 +323,103 @@ export const updatePassword = trycatchHandler(async (req, res) => {
   });
 });
 
+// Check if the refresh token is valid and issue a new access token
 export const refresh = trycatchHandler(async (req, res) => {
   const token = req.cookies.refreshToken;
-  console.log(`token : ${token}`);
   if (!token) throw new AppError("NO_REFRESH_TOKEN", "Unauthorized", 401);
 
   const hashToken = hashCode(token);
-  const payload = jwt.verify(token, config.jwt.refreshTokenSecret);
-
-  const user = await User.findOne({
-    where: {
-      id: payload.sub,
-    },
-  });
-  if (!user) {
-    throw new AppError({
-      errorCode: "REVOKED",
-      message: "احراز هویت تایید نشد",
-      statusCode: 401,
-    });
-  }
-  const refresh_token = await Token.findOne({
-    where: {
-      userId: payload.sub,
-    },
-  });
-  if (hashToken !== refresh_token.token) {
-    throw new AppError({
-      errorCode: "REVOKED",
-      message: "احراز هویت تایید نشد",
-      statusCode: 401,
-    });
-  }
-  const newAccessToken = AccessToken(user);
-  res.json({ accessToken: newAccessToken });
-});
-export async function logout(req, res, next) {
+  let payload;
   try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-      return res.sendStatus(204);
-    }
-    const tokenHash = hashCode(refreshToken);
-    const payload = jwt.verify(refreshToken, config.jwt.refreshTokenSecret);
-    console.log(payload);
-    await Token.destroy({
-      where: {
-        id: payload.tid,
-      },
-    });
-
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      path: "/",
-    });
-
-    return res.sendStatus(204);
+    payload = jwt.verify(token, config.jwt.refreshTokenSecret);
   } catch (err) {
-    next(err);
+    throw new AppError("INVALID_TOKEN", "توکن نامعتبر است", 401);
   }
-}
+  const { sub: userId, fid: familyId } = payload;
+  await sequelize.transaction(async (tx) => {
+    const tokenRecord = await Token.findOne({
+      where: {
+        userId: userId,
+        familyId: familyId,
+        token: hashToken,
+      },
+      lock: tx.LOCK.UPDATE,
+      transaction: tx,
+    });
+    if (!tokenRecord) {
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      throw new AppError(
+        "TOKEN_NOT_FOUND",
+        "نشست معتبری یافت نشد، لطفا دوباره لاگین کنید",
+        401,
+      );
+    }
+    // if token is already used, it means a possible token theft or replay attack
+    if (tokenRecord.is_used) {
+      await Token.destroy({
+        where: { familyId: familyId },
+        transaction: tx,
+      });
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      throw new AppError(
+        "SECURITY_BREACH",
+        "رفتار مشکوک در سیستم شما شناسایی شده است. به دلایل امنیتی لطفا دوباره لاگین کنید",
+        403,
+      );
+    }
+    if (hashToken !== tokenRecord.token) {
+      throw new AppError("REVOKED", "احراز هویت تایید نشد", 401);
+    }
+
+    const user = await User.findByPk(userId, { transaction: tx });
+    if (!user) throw new AppError("USER_NOT_FOUND", "کاربر یافت نشد", 401);
+
+    // save the token as used to prevent replay attacks
+    await tokenRecord.update({ is_used: true }, { transaction: tx });
+
+    const newSubTokenId = uuidv4();
+    const expireDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+    const newAccessToken = AccessToken(user);
+    const newRefreshToken = RefreshToken(user, newSubTokenId, familyId);
+
+    const newHashToken = hashCode(newRefreshToken);
+
+    await Token.create(
+      {
+        id: uuidv4(),
+        familyId: familyId,
+        userId: user.id,
+        token: newHashToken,
+        is_used: false,
+        expires_at: new Date(Date.now() + expireDays),
+      },
+      { transaction: tx },
+    );
+    // Set new tokens in cookies
+    res.cookie("accessToken", newAccessToken, getCookieOptions(15 * 60 * 1000));
+    res.cookie("refreshToken", newRefreshToken, getCookieOptions(expireDays));
+  });
+
+  res.status(200).json({ success: true });
+});
+export const logout = trycatchHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    try {
+      const payload = jwt.verify(refreshToken, config.jwt.refreshTokenSecret);
+      await Token.destroy({
+        where: { familyId: payload.fid },
+      });
+    } catch (err) {
+      console.error("Logout Error: Invalid token", err);
+    }
+  }
+  // Clear cookies
+  res.clearCookie("accessToken", getCookieOptions(0));
+  res.clearCookie("refreshToken", getCookieOptions(0));
+  res.status(200).json({ success: true, message: "با موفقیت خارج شدید" });
+});

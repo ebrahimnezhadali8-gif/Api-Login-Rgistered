@@ -1,7 +1,7 @@
 # Api-Login-Rgistered
 
 A simple and secure API for user registration, Two-step login, and password recovery using OTP (One-Time Password) verification.  
-This project is built with **Node.js**, **Express**, and **MySQL**, and includes proper database structure with stored procedures and automated OTP cleanup.
+This project is built with **Node.js**, **Express**, and **MySQL**, and iIncluding database structure in Express with **sequelize** and managing it with **sequelize-cli**
 
 <img src="./front-end/image/login.png" alt="page_login" width="500">
 page login
@@ -29,19 +29,24 @@ page login
     git clone https://github.com/ebrahimnezhadali8-gif/Api-Login-Rgistered.git
     cd Api-Login-Rgistered
 ```
-2. Install backend dependencies: `cd back-end`
-`npm install`
+
+2. Install backend dependencies:
+
+```bash
+    cd back-end
+    npm install
+```
 
 3. Configure MySQL database:
 
-Create a database (api_login).
-
-Import SQL files in this order:
-
-a. table_users.sql
-
-b. table_otp.sql
-
-c. proceduer.sql
+```bash
+    npx sequelize-cli db:migrate
+```
 
 4. Set environment variables in .env file
+
+5. start server backend:
+
+```bash
+    npm run start
+```

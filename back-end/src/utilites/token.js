@@ -12,15 +12,21 @@ export const AccessToken = (user) => {
   );
 };
 
-export const RefreshToken = (user , tokenId) => {
+export const RefreshToken = (user, tokenId, familyId) => {
   return jwt.sign(
-    {
-      sub: user.id,
-      tid: tokenId
-    },
+    { sub: user.id, jti: tokenId, fid: familyId },
     config.jwt.refreshTokenSecret,
     {
       expiresIn: config.jwt.refreshTokenExpires,
     },
   );
 };
+
+// settings cookies
+export const getCookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  maxAge: maxAge,
+  path: "/",
+});

@@ -47,10 +47,15 @@
         </form>
         <form class="profile-form" id="profile-update">
             <div class="icons">
-                <div class="icon-camera">
-                    <i class="bi bi-person icon"></i>
-                    <i class="bi bi-camera small-icon"></i>
-                </div>
+                <label for="profile-picture-upload" class="icon-camera" style="cursor: pointer;">
+                <i class="bi bi-person icon" id="default-icon"></i>
+        <!-- تصویر پیش‌نمایش جایگزین آیکون شخص می‌شود -->
+                    <img id="profile-preview" src="#" alt="Preview" style="display: none; width: 100px; height: 100px; border-radius: 10px; object-fit: cover;">
+                    <div>
+                        <i class="bi bi-camera small-icon"></i>
+                        <input type="file" id="profile-picture-upload" accept="image/*" style="display: none;">
+                    </div>
+                </label>
             </div>
             <div class="m-3 text-start">
                 <label for="exampleInputname" class="form-label"> نام و نام خانوادگی</label>
